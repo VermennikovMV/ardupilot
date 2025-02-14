@@ -499,7 +499,7 @@ private:
 #endif
 
 #if MODE_USER_ENABLED
-    AC_UserDefined *user_nav
+    AC_UserDefined *user_nav;
 #endif
 
         // System Timers
