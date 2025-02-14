@@ -46,7 +46,7 @@ bool ModeUserDefined::init(bool ignore_checks)
 
 // circle_run - runs the circle flight mode
 // should be called at 100hz or more
-void ModeCircle::run()
+void ModeUserDefined::run()
 {
     // set speed and acceleration limits
     pos_control->set_max_speed_accel_xy(wp_nav->get_default_speed_xy(), wp_nav->get_wp_acceleration());
@@ -105,7 +105,7 @@ void ModeCircle::run()
                 }
 
                 speed_changing = true;
-                copter.circle_nav->set_rate(rate_new);
+                copter.user_nav->set_rate(rate_new);
             }
         }
     }
@@ -138,12 +138,12 @@ void ModeCircle::run()
     attitude_control->input_thrust_vector_heading(pos_control->get_thrust_vector(), auto_yaw.get_heading());
 }
 
-uint32_t ModeCircle::wp_distance() const
+uint32_t ModeUserDefined::wp_distance() const
 {
     return copter.user_nav->get_distance_to_target();
 }
 
-int32_t ModeCircle::wp_bearing() const
+int32_t ModeUserDefined::wp_bearing() const
 {
     return copter.user_nav->get_bearing_to_target();
 }
