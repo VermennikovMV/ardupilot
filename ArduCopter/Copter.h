@@ -229,6 +229,7 @@ public:
     friend class ModeZigZag;
     friend class ModeAutorotate;
     friend class ModeTurtle;
+    friend class ModeUserDefined;
 
     friend class _AutoTakeoff;
 
