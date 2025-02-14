@@ -8,7 +8,7 @@
 extern const AP_HAL::HAL &hal;
 
 const AP_Param::GroupInfo AC_UserDefined::var_info[] = {
-    // @Param: RADIUS
+    // @Param: USER_RADIUS
     // @DisplayName: Circle Radius
     // @Description: Defines the radius of the circle the vehicle will fly when in Circle flight mode
     // @Units: cm
@@ -17,7 +17,7 @@ const AP_Param::GroupInfo AC_UserDefined::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("RADIUS", 0, AC_UserDefined, _radius_parm, AC_CIRCLE_RADIUS_DEFAULT),
 
-    // @Param: RATE
+    // @Param: USER_RATE
     // @DisplayName: Circle rate
     // @Description: Circle mode's turn rate in deg/sec.  Positive to turn clockwise, negative for counter clockwise. Circle rate must be less than ATC_SLEW_YAW parameter.
     // @Units: deg/s
@@ -26,7 +26,7 @@ const AP_Param::GroupInfo AC_UserDefined::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("RATE", 1, AC_UserDefined, _rate_parm, AC_CIRCLE_RATE_DEFAULT),
 
-    // @Param: OPTIONS
+    // @Param: USER_OPTIONS
     // @DisplayName: Circle options
     // @Description: 0:Enable or disable using the pitch/roll stick control circle mode's radius and rate
     // @Bitmask: 0:manual control, 1:face direction of travel, 2:Start at center rather than on perimeter, 3:Make Mount ROI the center of the circle
@@ -358,25 +358,25 @@ void AC_UserDefined::init_start_angle(bool use_heading)
 }
 
 // get expected source of terrain data
-AC_UserDefined::TerrainSource AC_Circle::get_terrain_source() const
+AC_UserDefined::TerrainSource AC_UserDefined::get_terrain_source() const
 {
     // use range finder if connected
     if (_rangefinder_available)
     {
-        return AC_Circle::TerrainSource::TERRAIN_FROM_RANGEFINDER;
+        return AC_UserDefined::TerrainSource::TERRAIN_FROM_RANGEFINDER;
     }
 #if AP_TERRAIN_AVAILABLE
     const AP_Terrain *terrain = AP_Terrain::get_singleton();
     if ((terrain != nullptr) && terrain->enabled())
     {
-        return AC_Circle::TerrainSource::TERRAIN_FROM_TERRAINDATABASE;
+        return AC_UserDefined::TerrainSource::TERRAIN_FROM_TERRAINDATABASE;
     }
     else
     {
-        return AC_Circle::TerrainSource::TERRAIN_UNAVAILABLE;
+        return AC_UserDefined::TerrainSource::TERRAIN_UNAVAILABLE;
     }
 #else
-    return AC_Circle::TerrainSource::TERRAIN_UNAVAILABLE;
+    return AC_UserDefined::TerrainSource::TERRAIN_UNAVAILABLE;
 #endif
 }
 
@@ -386,16 +386,16 @@ bool AC_UserDefined::get_terrain_offset(float &offset_cm)
     // calculate offset based on source (rangefinder or terrain database)
     switch (get_terrain_source())
     {
-    case AC_Circle::TerrainSource::TERRAIN_UNAVAILABLE:
+    case AC_UserDefined::TerrainSource::TERRAIN_UNAVAILABLE:
         return false;
-    case AC_Circle::TerrainSource::TERRAIN_FROM_RANGEFINDER:
+    case AC_UserDefined::TerrainSource::TERRAIN_FROM_RANGEFINDER:
         if (_rangefinder_healthy)
         {
             offset_cm = _rangefinder_terrain_offset_cm;
             return true;
         }
         return false;
-    case AC_Circle::TerrainSource::TERRAIN_FROM_TERRAINDATABASE:
+    case AC_UserDefined::TerrainSource::TERRAIN_FROM_TERRAINDATABASE:
 #if AP_TERRAIN_AVAILABLE
         float terr_alt = 0.0f;
         AP_Terrain *terrain = AP_Terrain::get_singleton();
