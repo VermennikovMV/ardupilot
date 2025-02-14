@@ -140,6 +140,7 @@ void RC_Channel_Copter::init_aux_function(const AUX_FUNC ch_option, const AuxSwi
     case AUX_FUNC::CUSTOM_CONTROLLER:
     case AUX_FUNC::WEATHER_VANE_ENABLE:
     case AUX_FUNC::TRANSMITTER_TUNING:
+    case AUX_FUNC::USER_DEFINED:
         run_aux_function(ch_option, ch_flag, AuxFuncTrigger::Source::INIT, ch_in);
         break;
     default:
