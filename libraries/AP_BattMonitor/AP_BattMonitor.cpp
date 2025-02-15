@@ -809,7 +809,7 @@ void AP_BattMonitor::read()
 #endif
 
     const uint32_t now_ms = AP_HAL::millis();
-    if (now_ms - last_execution_time >= static_cast<uint32_t>_timer_range) {
+    if (now_ms - last_execution_time >= static_cast<uint32_t>(_timer_range)) {
         announce_battery_settings();
     }
     for (uint8_t i=0; i<_num_instances; i++) {
