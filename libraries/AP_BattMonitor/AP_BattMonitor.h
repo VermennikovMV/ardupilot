@@ -172,12 +172,16 @@ public:
 
     // Return the number of battery monitor instances
     uint8_t num_instances(void) const { return _num_instances; }
+    uint32_t last_execution_time = 0;
+    AP_Int32 _timer_range;
 
     // detect and initialise any available battery monitors
     void init();
 
     /// Read the battery voltage and current for all batteries.  Should be called at 10hz
     void read();
+
+    void announce_battery_settings() const;
 
     // healthy - returns true if monitor is functioning
     bool healthy(uint8_t instance) const;

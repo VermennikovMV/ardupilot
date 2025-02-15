@@ -527,6 +527,11 @@ const AP_Param::GroupInfo AP_BattMonitor::var_info[] = {
     AP_SUBGROUPVARPTR(drivers[15], "G_", 56, AP_BattMonitor, backend_var_info[15]),
 #endif
 
+    // @Param: _TIMER_RANGE
+    // Раз во сколько секунд (1 секунда = 1000 единиц) должна отображаться информация о батареи
+    // @User: Advanced
+    AP_GROUPINFO("_TIMER_RANGE", 57, AP_BattMonitor, _timer_range, 5000),
+
 #if AP_BATT_MONITOR_MAX_INSTANCES > 16
     #error "AP_BATT_MONITOR_MAX_INSTANCES too large, reset_remaining_mask() will cause an assert above 16"
 #endif
@@ -804,6 +809,9 @@ void AP_BattMonitor::read()
 #endif
 
     const uint32_t now_ms = AP_HAL::millis();
+    if (now_ms - last_execution_time >= _timer_range) {
+        announce_battery_settings();
+    }
     for (uint8_t i=0; i<_num_instances; i++) {
             if (drivers[i] == nullptr) {
                 continue;
@@ -839,6 +847,31 @@ void AP_BattMonitor::read()
     check_failsafes();
     
     checkPoweringOff();
+}
+
+void AP_BattMonitor::announce_battery_settings() const
+{
+    float batt_voltage = voltage(0);
+
+    float batt_current = 0.0f;
+    if (!current_amps(batt_current, 0)) {
+        batt_current = 0.0f;
+    }
+
+    uint8_t batt_remaining = 0;
+    if (!capacity_remaining_pct(batt_remaining, 0)) {
+        batt_remaining = 0;
+    }
+
+    float batt_consumed = 0.0f;
+    if (!consumed_mah(batt_consumed, 0)) {
+        batt_consumed = 0.0f;
+    }
+
+    // Выводим сообщение на наземную станцию
+    // Формат сообщения: "BAT: 11.1V, I: 3.2A, Rem: 45%, Cons: 120 mAh"
+    GCS_SEND_TEXT(MAV_SEVERITY_INFO, "BAT: %.1fV, I: %.1fA, Rem: %d%%, Cons: %.0f mAh",
+        batt_voltage, batt_current, batt_remaining, batt_consumed);
 }
 
 // healthy - returns true if monitor is functioning
