@@ -880,7 +880,7 @@ void AP_BattMonitor::announce_battery_settings() const
 
     // Выводим сообщение на наземную станцию
     // Формат: "BAT: 11.1V, I: 3.2A, Rem: 100mAh, Cons: 120 mAh"
-    GCS_SEND_TEXT(MAV_SEVERITY_INFO, "BAT: %.1fV, I: %.1fA, Rem: %.0fmAh, Cons: %.0f mAh",
+    GCS_SEND_TEXT(MAV_SEVERITY_CRITICAL, "BAT: %.1fV, I: %.1fA, Rem: %.0fmAh, Cons: %.0f mAh",
                     batt_voltage, batt_current, remaining_mah, batt_consumed);
 }
 
