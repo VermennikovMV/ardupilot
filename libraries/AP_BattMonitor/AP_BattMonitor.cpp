@@ -530,7 +530,7 @@ const AP_Param::GroupInfo AP_BattMonitor::var_info[] = {
     // @Param: _TIMER_RANGE
     // Раз во сколько секунд (1 секунда = 1000 единиц) должна отображаться информация о батареи
     // @User: Advanced
-    AP_GROUPINFO("_TIMER_RANGE", 57, AP_BattMonitor, _timer_range, 15000),
+    AP_GROUPINFO("_TIMER_RANGE", 57, AP_BattMonitor, _timer_range, 5000),
 
 #if AP_BATT_MONITOR_MAX_INSTANCES > 16
     #error "AP_BATT_MONITOR_MAX_INSTANCES too large, reset_remaining_mask() will cause an assert above 16"
@@ -810,6 +810,7 @@ void AP_BattMonitor::read()
 
     const uint32_t now_ms = AP_HAL::millis();
     if (now_ms - last_execution_time >= static_cast<uint32_t>(_timer_range)) {
+        last_execution_time = now_ms;
         announce_battery_settings();
     }
     for (uint8_t i=0; i<_num_instances; i++) {
