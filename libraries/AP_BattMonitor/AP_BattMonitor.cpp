@@ -869,11 +869,21 @@ void AP_BattMonitor::announce_battery_settings() const
         batt_consumed = 0.0f;
     }
 
+    // Получаем полную ёмкость батареи в mAh
+    int32_t full_capacity = pack_capacity_mah(0);
+    // Вычисляем оставшуюся ёмкость в mAh и переводим её в Ah
+    float remaining_ah = 0.0f;
+    if (full_capacity > 0) {
+        // batt_remaining - процент, поэтому оставшаяся ёмкость = full_capacity * batt_remaining / 100
+        remaining_ah = (full_capacity * batt_remaining) / 100.0f / 1000.0f;
+    }
+
     // Выводим сообщение на наземную станцию
-    // Формат сообщения: "BAT: 11.1V, I: 3.2A, Rem: 45%, Cons: 120 mAh"
-    GCS_SEND_TEXT(MAV_SEVERITY_INFO, "BAT: %.1fV, I: %.1fA, Rem: %d%%, Cons: %.0f mAh",
-        batt_voltage, batt_current, batt_remaining, batt_consumed);
+    // Формат: "BAT: 11.1V, I: 3.2A, Rem: 45% (0.99Ah), Cons: 120 mAh"
+    GCS_SEND_TEXT(MAV_SEVERITY_INFO, "BAT: %.1fV, I: %.1fA, Rem: %d%% (%.2fAh), Cons: %.0f mAh",
+                    batt_voltage, batt_current, batt_remaining, remaining_ah, batt_consumed);
 }
+
 
 // healthy - returns true if monitor is functioning
 bool AP_BattMonitor::healthy(uint8_t instance) const {
