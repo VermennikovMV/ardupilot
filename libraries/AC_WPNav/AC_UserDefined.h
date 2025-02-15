@@ -128,7 +128,7 @@ private:
         TERRAIN_FROM_RANGEFINDER,
         TERRAIN_FROM_TERRAINDATABASE,
     };
-    AC_Circle::TerrainSource get_terrain_source() const;
+    AC_UserDefined::TerrainSource get_terrain_source() const;
 
     // get terrain's altitude (in cm above the ekf origin) at the current position (+ve means terrain below vehicle is above ekf origin's altitude)
     bool get_terrain_offset(float &offset_cm);
