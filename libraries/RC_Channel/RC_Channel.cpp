@@ -60,7 +60,6 @@ extern const AP_HAL::HAL& hal;
 #include <AP_Torqeedo/AP_Torqeedo.h>
 #include <AP_Vehicle/AP_Vehicle_Type.h>
 #include <AP_Parachute/AP_Parachute_config.h>
-#include <ardupilot/ArduCopter/mode.h>
 #define SWITCH_DEBOUNCE_TIME_MS  200
 
 const AP_Param::GroupInfo RC_Channel::var_info[] = {
@@ -953,9 +952,6 @@ bool RC_Channel::read_aux()
         }
         return false;
 #endif  // AP_VIDEOTX_ENABLED
-    } else if (_option == AUX_FUNC::USER_DEFINED) {
-        copter.set_mode(Mode::Number::USER_DEFINED, ModeReason::AUX_FUNCTION);
-    }
 
     AuxSwitchPos new_position;
     if (!read_3pos_switch(new_position)) {
