@@ -60,7 +60,7 @@ extern const AP_HAL::HAL& hal;
 #include <AP_Torqeedo/AP_Torqeedo.h>
 #include <AP_Vehicle/AP_Vehicle_Type.h>
 #include <AP_Parachute/AP_Parachute_config.h>
-#include <ArduCopter/mode.h>
+#include <ardupilot/ArduCopter/mode.h>
 #define SWITCH_DEBOUNCE_TIME_MS  200
 
 const AP_Param::GroupInfo RC_Channel::var_info[] = {
