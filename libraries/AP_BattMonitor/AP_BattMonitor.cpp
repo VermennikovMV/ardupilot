@@ -530,7 +530,7 @@ const AP_Param::GroupInfo AP_BattMonitor::var_info[] = {
     // @Param: _TIMER_RANGE
     // Раз во сколько секунд (1 секунда = 1000 единиц) должна отображаться информация о батареи
     // @User: Advanced
-    AP_GROUPINFO("_TIMER_RANGE", 57, AP_BattMonitor, _timer_range, 5000),
+    AP_GROUPINFO("_TIMER_RANGE", 57, AP_BattMonitor, _timer_range, 15000),
 
 #if AP_BATT_MONITOR_MAX_INSTANCES > 16
     #error "AP_BATT_MONITOR_MAX_INSTANCES too large, reset_remaining_mask() will cause an assert above 16"
