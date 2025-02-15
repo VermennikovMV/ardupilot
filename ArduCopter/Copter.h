@@ -491,6 +491,10 @@ private:
     AC_Circle *circle_nav;
 #endif
 
+#if MODE_USER_ENABLED
+    AC_UserDefined *user_nav
+#endif
+
     // System Timers
     // --------------
     // arm_time_ms - Records when vehicle was armed. Will be Zero if we are disarmed.

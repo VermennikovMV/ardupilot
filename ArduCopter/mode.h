@@ -888,6 +888,33 @@ private:
     bool speed_changing = false;     // true when the roll stick is being held to facilitate stopping at 0 rate
 };
 
+class ModeUserDefined : public Mode
+{
+
+public:
+    // inherit constructor
+    using Mode::Mode;
+    Number mode_number() const override { return Number::USER_DEFINED; }
+
+    bool init(bool ignore_checks) override;
+    void run() override;
+
+    bool requires_GPS() const override { return true; }
+    bool has_manual_throttle() const override { return false; }
+    bool allows_arming(AP_Arming::Method method) const override { return false; };
+    bool is_autopilot() const override { return true; }
+
+protected:
+    const char *name() const override { return "USER_DEFINED"; }
+    const char *name4() const override { return "USER"; }
+
+    uint32_t wp_distance() const override;
+    int32_t wp_bearing() const override;
+
+private:
+    // Circle
+    bool speed_changing = false; // true when the roll stick is being held to facilitate stopping at 0 rate
+};
 
 class ModeDrift : public Mode {
 

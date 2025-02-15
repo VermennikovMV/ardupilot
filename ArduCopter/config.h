@@ -151,6 +151,12 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
+// Oval - fly vehicle around a central point
+#ifndef MODE_USER_ENABLED
+#define MODE_USER_ENABLED 1
+#endif
+
+//////////////////////////////////////////////////////////////////////////////
 // Drift - fly vehicle in altitude-held, coordinated-turn mode
 #ifndef MODE_DRIFT_ENABLED
 # define MODE_DRIFT_ENABLED 1

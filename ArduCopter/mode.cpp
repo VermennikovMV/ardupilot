@@ -153,6 +153,11 @@ Mode *Copter::mode_from_mode_num(const Mode::Number mode)
             return &mode_turtle;
 #endif
 
+#if MODE_USER_ENABLED
+    case Mode::Number::USER_DEFINED:
+        return &mode_userdefined;
+#endif
+
         default:
             break;
     }
