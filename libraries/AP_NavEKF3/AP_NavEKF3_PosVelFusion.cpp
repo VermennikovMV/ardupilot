@@ -192,6 +192,7 @@ bool NavEKF3_core::setLatLng(const Location &loc, float posAccuracy, uint32_t ti
 {
     gcs().send_text(MAV_SEVERITY_EMERGENCY, "I'm second! AP_NavEKF3_PosVelFusion.cpp");
     readGpsData();
+    const auto &gps = dal.gps();
     const Location &gpsloc = gps.location(selected_gps);
     Location gpsloc_fieldelevation = gpsloc; 
     setOrigin(gpsloc_fieldelevation);
