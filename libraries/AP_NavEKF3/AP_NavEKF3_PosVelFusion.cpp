@@ -191,9 +191,12 @@ void NavEKF3_core::ResetPosition(resetDataSource posResetSource)
 bool NavEKF3_core::setLatLng(const Location &loc, float posAccuracy, uint32_t timestamp_ms)
 {
     gcs().send_text(MAV_SEVERITY_EMERGENCY, "I'm second! AP_NavEKF3_PosVelFusion.cpp");
-    if ((imuSampleTime_ms - lastGpsPosPassTime_ms) < frontend->deadReckonDeclare_ms ||
-        (PV_AidingMode == AID_NONE)
-        || !validOrigin) {
+    readGpsData()
+    const Location &gpsloc = gps.location(selected_gps);
+    Location gpsloc_fieldelevation = gpsloc; 
+    setOrigin(gpsloc_fieldelevation)
+    setAidingMode()
+    if ((PV_AidingMode == AID_NONE) || !validOrigin) {
         char message[100];
         snprintf(message, sizeof(message),
             "imuSampleTime_ms: %lu, lastGpsPosPassTime_ms: %lu, PV_AidingMode: %d, validOrigin: %d",
