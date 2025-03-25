@@ -5360,6 +5360,7 @@ MAV_RESULT GCS_MAVLINK::handle_command_int_external_position_estimate(const mavl
         gcs().send_text(MAV_SEVERITY_EMERGENCY, "handle_command_external_estimate: Failed!");
         return MAV_RESULT_FAILED;
     }
+    gcs().send_text(MAV_SEVERITY_EMERGENCY, "handle_command_external_estimate: Accept!");
     return MAV_RESULT_ACCEPTED;
 }
 #endif // AP_AHRS_POSITION_RESET_ENABLED

@@ -197,14 +197,20 @@ bool NavEKF3_core::setLatLng(const Location &loc, float posAccuracy, uint32_t ti
     Location gpsloc_fieldelevation = gpsloc; 
     setOrigin(gpsloc_fieldelevation);
     setAidingMode();
-    if ((PV_AidingMode == AID_NONE) || !validOrigin) {
-        char message[100];
+    char message[100];
+    if ((imuSampleTime_ms - lastGpsPosPassTime_ms) < frontend->deadReckonDeclare_ms ||
+         (PV_AidingMode == AID_NONE)
+         || !validOrigin) {
         snprintf(message, sizeof(message),
             "imuSampleTime_ms: %lu, lastGpsPosPassTime_ms: %lu, PV_AidingMode: %d, validOrigin: %d",
             imuSampleTime_ms, lastGpsPosPassTime_ms, PV_AidingMode, validOrigin);
             gcs().send_text(MAV_SEVERITY_EMERGENCY, "%s", message);
         return false;
     }
+    snprintf(message, sizeof(message),
+    "imuSampleTime_ms: %lu, lastGpsPosPassTime_ms: %lu, PV_AidingMode: %d, validOrigin: %d",
+    imuSampleTime_ms, lastGpsPosPassTime_ms, PV_AidingMode, validOrigin);
+    gcs().send_text(MAV_SEVERITY_EMERGENCY, "%s", message);
 
     // Store the position before the reset so that we can record the reset delta
     posResetNE.x = stateStruct.position.x;
