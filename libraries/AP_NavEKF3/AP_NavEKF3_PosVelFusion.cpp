@@ -192,11 +192,6 @@ bool NavEKF3_core::setLatLng(const Location &loc, float posAccuracy, uint32_t ti
 {
     gcs().send_text(MAV_SEVERITY_EMERGENCY, "I'm second! AP_NavEKF3_PosVelFusion.cpp");
     char message[100];
-    if (!validOrigin) {
-        AP_AHRS &ahrs = ahrs();
-        ahrs.set_origin(10);
-        gcs().send_text(MAV_SEVERITY_EMERGENCY, "Origin set");
-    }
     if ((imuSampleTime_ms - lastGpsPosPassTime_ms) < frontend->deadReckonDeclare_ms ||
          (PV_AidingMode == AID_NONE)
          || !validOrigin) {
