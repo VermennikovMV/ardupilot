@@ -21,7 +21,7 @@
 #include <AP_Param/AP_Param.h>
 
 #define VTX_MAX_CHANNELS 8
-#define VTX_MAX_POWER_LEVELS 10
+#define VTX_MAX_POWER_LEVELS 12
 
 class AP_VideoTX {
 public:
@@ -65,8 +65,6 @@ public:
         BAND_1G3_A,
         BAND_1G3_B,
         BAND_X,
-        BAND_3G3_A,
-        BAND_3G3_B,
         MAX_BANDS
     };
 
