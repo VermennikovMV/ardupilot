@@ -87,7 +87,7 @@ const AP_Param::GroupInfo AP_VideoTX::var_info[] = {
 
 extern const AP_HAL::HAL& hal;
 
-const char * AP_VideoTX::band_names[] = {"A","B","E","F","R","L","1G3_A","1G3_B","X"};
+const char * AP_VideoTX::band_names[] = {"A","B","E","F","R","L","1G3_A","1G3_B","X", "3G3_A","3G3_B"};
 
 const uint16_t AP_VideoTX::VIDEO_CHANNELS[AP_VideoTX::MAX_BANDS][VTX_MAX_CHANNELS] =
 {
