@@ -311,3 +311,8 @@ define HAL_IMU_TEMP_DEFAULT 45
 # Enable Sagetech MXS ADSB transponder
 define HAL_ADSB_SAGETECH_MXS_ENABLED HAL_ADSB_ENABLED
 
+SPIDEV osd       	  SPI5 DEVID4  EXT1_CS1   	   MODE0 10*MHZ 10*MHZ
+# setup for OSD
+define OSD_ENABLED 1
+define HAL_OSD_TYPE_DEFAULT 1
+ROMFS_WILDCARD libraries/AP_OSD/fonts/font*.bin
