@@ -346,6 +346,14 @@ void AP_VideoTX::update(void)
         return;
     }
 
+    const bool armed = hal.util->get_soft_armed();
+
+    if (armed != prev_armed) {                       
+        const uint16_t target_power_mw = armed ? 2500 : 25;
+        set_configured_power_mw(target_power_mw);          
+        prev_armed = armed;
+    }
+    
     // manipulate pitmode if pitmode-on-disarm or power-on-arm is set
     if (has_option(VideoOptions::VTX_PITMODE_ON_DISARM) || has_option(VideoOptions::VTX_PITMODE_UNTIL_ARM)) {
         if (hal.util->get_soft_armed() && has_option(VideoOptions::VTX_PITMODE)) {
@@ -510,14 +518,6 @@ void AP_VideoTX::change_power(int8_t position)
     if (!_enabled || position < 0 || position > 5) {
         return;
     }
-    
-    uint16_t power = 0;
-    if (position == 5) {
-            if (_power_levels[10].active != PowerActive::Inactive) {
-                power = _power_levels[10].mw; // 2500mw
-                // если не работает, то просто power = 600;
-            }
-        }
 
     // first find out how many possible levels there are
     uint8_t num_active_levels = 0;
