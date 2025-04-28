@@ -96,7 +96,7 @@ public:
 
     static uint16_t get_frequency_mhz(uint8_t band, uint8_t channel) { return VIDEO_CHANNELS[band][channel]; }
     static bool get_band_and_channel(uint16_t freq, VideoBand& band, uint8_t& channel);
-    const bool prev_armed = false;
+    bool prev_armed = false;
 
     void set_frequency_mhz(uint16_t freq) { _current_frequency = freq; }
     void set_configured_frequency_mhz(uint16_t freq) { _frequency_mhz.set_and_save_ifchanged(freq); }
