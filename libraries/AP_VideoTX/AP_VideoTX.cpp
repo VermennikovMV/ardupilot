@@ -519,6 +519,7 @@ void AP_VideoTX::change_power(int8_t position)
         return;
     }
 
+    uint16 power = 0;
     // first find out how many possible levels there are
     uint8_t num_active_levels = 0;
     for (uint8_t i = 0; i < VTX_MAX_POWER_LEVELS; i++) {
