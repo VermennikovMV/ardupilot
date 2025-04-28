@@ -510,7 +510,8 @@ void AP_VideoTX::change_power(int8_t position)
     if (!_enabled || position < 0 || position > 5) {
         return;
     }
-
+    
+    uint16_t power = 0;
     if (position == 5) {
             if (_power_levels[10].active != PowerActive::Inactive) {
                 power = _power_levels[10].mw; // 2500mw
@@ -528,7 +529,6 @@ void AP_VideoTX::change_power(int8_t position)
     // iterate through to find the level
     uint16_t level = constrain_int16(roundf((num_active_levels * (position + 1)/ 6.0f) - 1), 0, num_active_levels - 1);
     debug("looking for pos %d power level %d from %d", position, level, num_active_levels);
-    uint16_t power = 0;
     for (uint8_t i = 0, j = 0; i < num_active_levels; i++, j++) {
         while (j < VTX_MAX_POWER_LEVELS-1 && _power_levels[j].active == PowerActive::Inactive) {
             j++;
