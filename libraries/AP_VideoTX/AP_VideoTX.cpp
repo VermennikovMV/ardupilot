@@ -518,8 +518,6 @@ void AP_VideoTX::change_power(int8_t position)
     if (!_enabled || position < 0 || position > 5) {
         return;
     }
-
-    uint16 power = 0;
     // first find out how many possible levels there are
     uint8_t num_active_levels = 0;
     for (uint8_t i = 0; i < VTX_MAX_POWER_LEVELS; i++) {
@@ -530,6 +528,7 @@ void AP_VideoTX::change_power(int8_t position)
     // iterate through to find the level
     uint16_t level = constrain_int16(roundf((num_active_levels * (position + 1)/ 6.0f) - 1), 0, num_active_levels - 1);
     debug("looking for pos %d power level %d from %d", position, level, num_active_levels);
+    uint16_t power = 0;
     for (uint8_t i = 0, j = 0; i < num_active_levels; i++, j++) {
         while (j < VTX_MAX_POWER_LEVELS-1 && _power_levels[j].active == PowerActive::Inactive) {
             j++;
@@ -540,7 +539,6 @@ void AP_VideoTX::change_power(int8_t position)
             break;
         }
     }
-
     if (power == 0) {
         if (!hal.util->get_soft_armed()) {    // don't allow pitmode to be entered if already armed
             set_configured_options(get_configured_options() | uint8_t(VideoOptions::VTX_PITMODE));
