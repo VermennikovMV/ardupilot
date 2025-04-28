@@ -510,6 +510,14 @@ void AP_VideoTX::change_power(int8_t position)
     if (!_enabled || position < 0 || position > 5) {
         return;
     }
+
+    if (position == 5) {
+            if (_power_levels[10].active != PowerActive::Inactive) {
+                power = _power_levels[10].mw; // 2500mw
+                // если не работает, то просто power = 600;
+            }
+        }
+
     // first find out how many possible levels there are
     uint8_t num_active_levels = 0;
     for (uint8_t i = 0; i < VTX_MAX_POWER_LEVELS; i++) {
