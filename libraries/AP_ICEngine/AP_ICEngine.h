@@ -90,6 +90,8 @@ private:
 
     uint32_t _last_ms = 0;
     uint32_t _accum_ms = 0;
+    uint32_t _last_named_ms  = 0;
+    void     send_runtime_named_value();
 
     enum ICE_State state;
 
