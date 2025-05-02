@@ -301,7 +301,7 @@ void AP_ICEngine::do_aux_function(const RC_Channel::AuxFuncTrigger &trigger)
     aux_pos = trigger.pos;
 }
 
-void AP_ICE::send_runtime_named_value()
+void AP_ICEngine::send_runtime_named_value()
 {
     const uint32_t now = AP_HAL::millis();
     if (now - _last_named_ms < 1000U) {        // 1 Гц
