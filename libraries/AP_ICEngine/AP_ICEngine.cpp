@@ -186,6 +186,13 @@ const AP_Param::GroupInfo AP_ICEngine::var_info[] = {
     // @Range: 0 127
     AP_GROUPINFO("STRT_MX_RTRY", 20, AP_ICEngine, max_crank_retry, 0),
 
+    // @Param: RUNTIME
+    // @DisplayName: Gas engine total runtime
+    // @Description: Суммарное время, когда RPM выше ICE_RPM_THRESH. Считается в минутах.
+    // @Units: min
+    // @User: Standard
+    AP_GROUPINFO("RUNTIME", 0, AP_ICE, runtime_min, 0),
+
     AP_GROUPEND
 };
 
@@ -303,6 +310,27 @@ void AP_ICEngine::update(void)
         return;
     }
 
+    const uint32_t now = AP_HAL::millis();
+    if (_last_ms == 0) {
+        _last_ms = now;
+        return;
+    }
+
+    const bool running =
+        AP::rpm().get_rpm() > AP::params().get_int16("ICE_RPM_THRESH", 800);  // 800 об/мин по умолчанию
+
+    if (running) {
+        _accum_ms += (now - _last_ms);
+        // каждую целую минуту увеличиваем параметр
+        if (_accum_ms >= 60000) {
+            runtime_min += _accum_ms / 60000;
+            _accum_ms  %= 60000;
+            AP_Param::set_save_required();   // помечаем для сохранения во Flash
+        }
+    }
+
+    _last_ms = now;
+    
     bool should_run = false;
     uint32_t now = AP_HAL::millis();
 
