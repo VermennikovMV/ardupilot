@@ -301,6 +301,25 @@ void AP_ICEngine::do_aux_function(const RC_Channel::AuxFuncTrigger &trigger)
     aux_pos = trigger.pos;
 }
 
+void AP_ICE::send_runtime_named_value()
+{
+    const uint32_t now = AP_HAL::millis();
+    if (now - _last_named_ms < 1000U) {        // 1 Гц
+        return;
+    }
+    _last_named_ms = now;
+
+    const uint16_t half_hours = runtime_min / 30;
+    const float    hours      = half_hours * 0.5f;
+
+    for (uint8_t i = 0; i < AP::gcs().num_instances(); i++) {
+        if (!AP::gcs().channel_enabled(i)) {
+            continue;
+        }
+        AP::gcs()[i].send_named_float("ICE_RUNTIME_HOURS", hours);
+    }
+}
+
 /*
   update engine state
  */
