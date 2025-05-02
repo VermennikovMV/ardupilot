@@ -350,6 +350,8 @@ void AP_ICEngine::update(void)
 
     _last_ms = now;
     
+    send_runtime_named_value(); 
+    
     bool should_run = false;
     uint32_t now = AP_HAL::millis();
 
