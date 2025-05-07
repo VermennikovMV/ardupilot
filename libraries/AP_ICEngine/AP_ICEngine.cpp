@@ -191,7 +191,7 @@ const AP_Param::GroupInfo AP_ICEngine::var_info[] = {
     // @Description: Суммарное время, когда RPM выше ICE_RPM_THRESH. Считается в минутах.
     // @Units: min
     // @User: Standard
-    AP_GROUPINFO("RUNTIME", 0, AP_ICE, runtime_min, 0),
+    AP_GROUPINFO("RUNTIME", 0, AP_ICEngine, runtime_min, 0),
 
     AP_GROUPEND
 };
