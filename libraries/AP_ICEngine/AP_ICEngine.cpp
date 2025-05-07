@@ -303,17 +303,10 @@ void AP_ICEngine::do_aux_function(const RC_Channel::AuxFuncTrigger &trigger)
 
 void AP_ICEngine::send_runtime_named_value() {
     const int32_t runtime = runtime_min.get();
-
     const uint16_t half_hours = runtime / 30;  
-
     const float hours = half_hours * 0.5f;
 
-    for (uint8_t chan = 0; chan < MAVLINK_COMM_NUM_BUFFERS; chan++) {
-        if (!(mavlink_active & (1U << chan))) {
-            continue;
-        }
-        hal.gcs->send_named_float("ICE_Runtime_Hours", hours);
-    }
+    hal.gcs->send_named_float("ICE_Runtime_Hours", hours);
 }
 
 /*
