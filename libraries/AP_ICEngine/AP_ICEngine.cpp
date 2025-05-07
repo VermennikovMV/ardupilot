@@ -318,7 +318,7 @@ void AP_ICEngine::update(void)
         return;
     }
 
-    const uint32_t now = AP_HAL::millis();
+    uint32_t now = AP_HAL::millis();
     if (_last_ms == 0) {
         _last_ms = now;
         return;
@@ -345,7 +345,6 @@ void AP_ICEngine::update(void)
     send_runtime_named_value(); 
     
     bool should_run = false;
-    uint32_t now = AP_HAL::millis();
 
 
     if ((state == ICE_START_HEIGHT_DELAY) && (aux_pos == RC_Channel::AuxSwitchPos::HIGH)) {
