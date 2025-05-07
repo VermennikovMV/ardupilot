@@ -186,6 +186,13 @@ const AP_Param::GroupInfo AP_ICEngine::var_info[] = {
     // @Range: 0 127
     AP_GROUPINFO("STRT_MX_RTRY", 20, AP_ICEngine, max_crank_retry, 0),
 
+    // @Param: RUNTIME
+    // @DisplayName: Gas engine total runtime
+    // @Description: Суммарное время, когда RPM выше ICE_RPM_THRESH. Считается в минутах.
+    // @Units: min
+    // @User: Standard
+    AP_GROUPINFO("RUNTIME", 0, AP_ICEngine, runtime_min, 0),
+
     AP_GROUPEND
 };
 
