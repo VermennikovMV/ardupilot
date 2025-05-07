@@ -191,8 +191,7 @@ const AP_Param::GroupInfo AP_ICEngine::var_info[] = {
     // @Description: If set 0 then there is no limit to retrials. If set to a value greater than 0 then the engine will retry starting the engine this many times before giving up.
     // @User: Standard
     // @Range: 0 127
-    AP_GROUPINFO("STRT_MX_RTRY2", 20, AP_ICEngine, max_crank_retry2, 0),
-
+    AP_GROUPINFO("STRT_MX_RTRY2", 20, AP_ICEngine, max_crank_retry2, 0)
 
     AP_GROUPEND
 };
