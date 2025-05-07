@@ -336,7 +336,7 @@ void AP_ICEngine::update(void)
         if (_accum_ms >= 60000) {
             runtime_min.set(runtime + _accum_ms / 60000);
             _accum_ms  %= 60000;
-            AP_Param::set_save_required();   // помечаем для сохранения во Flash
+            runtime_min.save(true);   // помечаем для сохранения во Flash
         }
     }
 
