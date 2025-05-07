@@ -58,6 +58,8 @@ public:
         ICE_RUNNING=4
     };
 
+    AP_Int32 runtime_min;
+
     // get current engine control state
     ICE_State get_state(void) const { return !enable?ICE_DISABLED:state; }
 
@@ -85,6 +87,11 @@ private:
 
     void set_ignition(bool on);
     void set_starter(bool on);
+
+    uint32_t _last_ms = 0;
+    uint32_t _accum_ms = 0;
+    uint32_t _last_named_ms  = 0;
+    void     send_runtime_named_value();
 
     enum ICE_State state;
 
