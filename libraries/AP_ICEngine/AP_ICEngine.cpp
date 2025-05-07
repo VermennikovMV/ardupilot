@@ -363,10 +363,7 @@ void AP_ICEngine::update(void)
         _runtime_ms += dt;
     }
 
-    if (now - _last_send_ms >= 1000) {
-        _last_send_ms = now;
-        send_runtime();
-    }
+    send_runtime();
 
 #if HAL_PARACHUTE_ENABLED
     // Stop on parachute deployment
