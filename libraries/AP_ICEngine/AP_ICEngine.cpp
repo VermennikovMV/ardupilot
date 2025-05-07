@@ -293,6 +293,12 @@ void AP_ICEngine::do_aux_function(const RC_Channel::AuxFuncTrigger &trigger)
     aux_pos = trigger.pos;
 }
 
+void AP_ICEngine::send_runtime()
+{
+    float minutes = _runtime_ms / 60000.0f;
+    gcs().send_named_float("ENGINE_RUNTIME_MIN", minutes);
+}
+
 /*
   update engine state
  */
@@ -341,6 +347,25 @@ void AP_ICEngine::update(void)
                 should_run = false;
             }
         }
+    }
+
+    if (_last_ms == 0) {
+        _last_ms = now;
+        return;
+    }
+    uint32_t dt = now - _last_ms;
+    _last_ms = now;
+
+    float current_rpm = 0;
+    bool have = rpm()->get_rpm(rpm_instance-1, current_rpm);
+
+    if (have && current_rpm > rpm_threshold) {
+        _runtime_ms += dt;
+    }
+
+    if (now - _last_send_ms >= 1000) {
+        _last_send_ms = now;
+        send_runtime();
     }
 
 #if HAL_PARACHUTE_ENABLED
