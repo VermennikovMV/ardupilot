@@ -58,8 +58,6 @@ public:
         ICE_RUNNING=4
     };
 
-    AP_Int32 runtime_min;
-
     // get current engine control state
     ICE_State get_state(void) const { return !enable?ICE_DISABLED:state; }
 
@@ -120,13 +118,14 @@ private:
 
     // max crank retry
     AP_Int8 max_crank_retry;
-    AP_Int8 max_crank_retry2;
     int8_t crank_retry_ct;
     
 #if AP_RPM_ENABLED
     // RPM above which engine is considered to be running
     AP_Int32 rpm_threshold;
 #endif
+    //runtime
+    AP_Int32 runtime_min;
 
     // time when we started the starter
     uint32_t starter_start_time_ms;
