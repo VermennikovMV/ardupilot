@@ -306,7 +306,7 @@ void AP_ICEngine::send_runtime_named_value() {
     const uint16_t half_hours = runtime / 30;  
     const float hours = half_hours * 0.5f;
 
-    hal.gcs->send_named_float("ICE_Runtime_Hours", hours);
+    gcs().send_named_float("ICE_Runtime_Hours", hours);
 }
 
 /*
