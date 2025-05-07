@@ -324,6 +324,7 @@ void AP_ICEngine::update(void)
         return;
     }
 
+    const int32_t runtime = runtime_min.get();
     float current_rpm;
     bool have_rpm = AP::rpm()->get_rpm(rpm_instance, current_rpm);
     bool running = have_rpm && (current_rpm > rpm_threshold);
@@ -333,7 +334,7 @@ void AP_ICEngine::update(void)
         _accum_ms += (now - _last_ms);
         // каждую целую минуту увеличиваем параметр
         if (_accum_ms >= 60000) {
-            runtime_min = runtime_min + _accum_ms / 60000;
+            runtime_min.set(runtime + _accum_ms / 60000);
             _accum_ms  %= 60000;
             AP_Param::set_save_required();   // помечаем для сохранения во Flash
         }
