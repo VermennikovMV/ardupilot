@@ -326,7 +326,7 @@ void AP_ICEngine::update(void)
 
     float current_rpm;
     bool have_rpm = AP::rpm()->get_rpm(rpm_instance, current_rpm);
-    bool running = have_rpm && (current_rpm > AP::params().get_int16("ICE_RPM_THRESH", 800));
+    bool running = have_rpm && (current_rpm > rpm_threshold);
 
 
     if (running) {
