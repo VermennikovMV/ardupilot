@@ -58,7 +58,7 @@ public:
         ICE_RUNNING=4
     };
 
-    AP_Int32 runtime_min{0};
+    AP_Int32 runtime_min = 0;
 
     // get current engine control state
     ICE_State get_state(void) const { return !enable?ICE_DISABLED:state; }
