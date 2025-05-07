@@ -357,7 +357,7 @@ void AP_ICEngine::update(void)
     _last_ms = now;
 
     float current_rpm = 0;
-    bool have = rpm()->get_rpm(rpm_instance-1, current_rpm);
+    bool have = AP::rpm()->get_rpm(rpm_instance-1, current_rpm);
 
     if (have && current_rpm > rpm_threshold) {
         _runtime_ms += dt;
