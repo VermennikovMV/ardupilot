@@ -86,10 +86,10 @@ private:
     void set_ignition(bool on);
     void set_starter(bool on);
 
-    uint32_t _last_ms = 0;
-    uint32_t _accum_ms = 0;
-    uint32_t _last_named_ms  = 0;
-    void     send_runtime_named_value();
+    uint32_t _runtime_ms;     // накопленные миллисекунды работы
+    uint32_t _last_ms;        // время прошлого захода update()
+    uint32_t _last_send_ms;   // время прошлого отправления в GCS
+    void     send_runtime();
 
     enum ICE_State state;
 
@@ -124,8 +124,6 @@ private:
     // RPM above which engine is considered to be running
     AP_Int32 rpm_threshold;
 #endif
-    //runtime
-    AP_Int32 _runtime_min;
 
     // time when we started the starter
     uint32_t starter_start_time_ms;
