@@ -333,7 +333,7 @@ void AP_ICEngine::update(void)
         _accum_ms += (now - _last_ms);
         // каждую целую минуту увеличиваем параметр
         if (_accum_ms >= 60000) {
-            runtime_min += _accum_ms / 60000;
+            runtime_min = runtime_min + _accum_ms / 60000;
             _accum_ms  %= 60000;
             AP_Param::set_save_required();   // помечаем для сохранения во Flash
         }
