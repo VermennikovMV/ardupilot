@@ -120,6 +120,7 @@ private:
 
     // max crank retry
     AP_Int8 max_crank_retry;
+    AP_Int8 max_crank_retry2;
     int8_t crank_retry_ct;
     
 #if AP_RPM_ENABLED
