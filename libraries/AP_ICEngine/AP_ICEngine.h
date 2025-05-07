@@ -125,7 +125,7 @@ private:
     AP_Int32 rpm_threshold;
 #endif
     //runtime
-    AP_Int32 runtime_min;
+    AP_Int32 _runtime_min;
 
     // time when we started the starter
     uint32_t starter_start_time_ms;
