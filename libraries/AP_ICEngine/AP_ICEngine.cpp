@@ -296,7 +296,7 @@ void AP_ICEngine::do_aux_function(const RC_Channel::AuxFuncTrigger &trigger)
 void AP_ICEngine::send_runtime()
 {
     float minutes = _runtime_ms / 60000.0f;
-    gcs().send_named_float("ENGINE_RUNTIME_MIN", minutes);
+    gcs().send_named_float("RUNTIME", minutes);
 }
 
 /*
