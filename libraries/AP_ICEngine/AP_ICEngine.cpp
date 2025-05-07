@@ -186,6 +186,13 @@ const AP_Param::GroupInfo AP_ICEngine::var_info[] = {
     // @Range: 0 127
     AP_GROUPINFO("STRT_MX_RTRY", 20, AP_ICEngine, max_crank_retry, 0),
 
+    // @Param: RUNTIME
+    // @DisplayName: Gas engine total runtime
+    // @Description: Суммарное время, когда RPM выше ICE_RPM_THRESH. Считается в минутах.
+    // @Units: min
+    // @User: Standard
+    AP_GROUPINFO("RUNTIME", 0, AP_ICEngine, runtime_min, 0),
+
     AP_GROUPEND
 };
 
@@ -294,6 +301,14 @@ void AP_ICEngine::do_aux_function(const RC_Channel::AuxFuncTrigger &trigger)
     aux_pos = trigger.pos;
 }
 
+void AP_ICEngine::send_runtime_named_value() {
+    const int32_t runtime = runtime_min.get();
+    const uint16_t half_hours = runtime / 30;  
+    const float hours = half_hours * 0.5f;
+
+    gcs().send_named_float("ICE_Runtime_Hours", hours);
+}
+
 /*
   update engine state
  */
@@ -303,8 +318,33 @@ void AP_ICEngine::update(void)
         return;
     }
 
-    bool should_run = false;
     uint32_t now = AP_HAL::millis();
+    if (_last_ms == 0) {
+        _last_ms = now;
+        return;
+    }
+
+    const int32_t runtime = runtime_min.get();
+    float current_rpm;
+    bool have_rpm = AP::rpm()->get_rpm(rpm_instance, current_rpm);
+    bool running = have_rpm && (current_rpm > rpm_threshold);
+
+
+    if (running) {
+        _accum_ms += (now - _last_ms);
+        // каждую целую минуту увеличиваем параметр
+        if (_accum_ms >= 60000) {
+            runtime_min.set(runtime + _accum_ms / 60000);
+            _accum_ms  %= 60000;
+            runtime_min.save(true);   // помечаем для сохранения во Flash
+        }
+    }
+
+    _last_ms = now;
+    
+    send_runtime_named_value(); 
+    
+    bool should_run = false;
 
 
     if ((state == ICE_START_HEIGHT_DELAY) && (aux_pos == RC_Channel::AuxSwitchPos::HIGH)) {
