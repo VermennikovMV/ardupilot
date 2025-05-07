@@ -31,13 +31,6 @@
 extern const AP_HAL::HAL& hal;
 
 const AP_Param::GroupInfo AP_ICEngine::var_info[] = {
-    // @Param: _RUNTIME
-    // @DisplayName: ICE Runtime
-    // @Description: Minutes engine running
-    // @User: Standard
-    // @Units: min
-    AP_GROUPINFO("RUNTIME", 0, AP_ICEngine, _runtime_min, 0),
-
     // @Param: ENABLE
     // @DisplayName: Enable ICEngine control
     // @Description: This enables internal combustion engine control
