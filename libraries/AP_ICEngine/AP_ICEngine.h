@@ -58,8 +58,6 @@ public:
         ICE_RUNNING=4
     };
 
-    AP_Int32 runtime_min;
-
     // get current engine control state
     ICE_State get_state(void) const { return !enable?ICE_DISABLED:state; }
 
@@ -103,6 +101,9 @@ private:
 
     // enable library
     AP_Int8 enable;
+
+    //runtime
+    AP_Int32 runtime_min;
 
     // min pwm on start channel for engine stop
     AP_Int16 start_chan_min_pwm;
