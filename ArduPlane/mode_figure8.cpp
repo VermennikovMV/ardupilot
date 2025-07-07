@@ -3,16 +3,18 @@
 
 bool ModeFigure8::_enter()
 {
-    center1 = plane.current_loc;
-    center2 = plane.current_loc;
+    plane.do_loiter_at_location();
+    plane.setup_terrain_target_alt(plane.next_WP_loc);
+
+    center1 = plane.next_WP_loc;
+    center2 = center1;
     const float radius = fabsf(plane.aparm.loiter_radius);
-    float use_radius = radius <= 1 ? LOITER_RADIUS_DEFAULT : radius;
-    center2.offset_bearing(90, use_radius*2);
-    plane.next_WP_loc = center1;
+    const float use_radius = radius <= 1 ? LOITER_RADIUS_DEFAULT : radius;
+    center2.offset_bearing(90, use_radius * 2);
+
     current_center = 0;
     plane.loiter.direction = 1;
     plane.loiter_angle_reset();
-    plane.setup_terrain_target_alt(plane.next_WP_loc);
     return true;
 }
 
