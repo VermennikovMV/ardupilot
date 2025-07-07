@@ -417,15 +417,12 @@ public:
     void update() override;
 
 protected:
-
     bool _enter() override;
 
 private:
     int8_t direction = 1;
-    float radius_m = 0;
-    Location cross_loc{};
-    Location right_loc{};
-    Location left_loc{};
+    uint32_t last_switch_ms = 0;
+    static constexpr uint32_t switch_period_ms = 5000;
 };
 
 class ModeLoiter : public Mode
