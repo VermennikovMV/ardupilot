@@ -39,6 +39,16 @@ void ModeEight::update()
 
     if (labs(plane.loiter.sum_cd) >= 18000) {
         direction = -direction;
+
+        cross_loc = plane.current_loc;
+        const float yaw_rad = radians(ahrs.yaw_sensor * 0.01f);
+        Vector2f ofs(radius_m, 0);
+        ofs.rotate(yaw_rad + M_PI_2);
+        right_loc = cross_loc;
+        right_loc.offset(ofs.x, ofs.y);
+        left_loc = cross_loc;
+        left_loc.offset(-ofs.x, -ofs.y);
+
         if (direction > 0) {
             plane.next_WP_loc = right_loc;
             plane.next_WP_loc.loiter_ccw = 0;
