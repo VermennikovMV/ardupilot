@@ -13,6 +13,9 @@ Mode *Plane::mode_from_mode_num(const enum Mode::Number num)
     case Mode::Number::CIRCLE:
         ret = &mode_circle;
         break;
+    case Mode::Number::EIGHT:
+        ret = &mode_eight;
+        break;
     case Mode::Number::STABILIZE:
         ret = &mode_stabilize;
         break;

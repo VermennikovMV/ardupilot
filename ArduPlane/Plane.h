@@ -150,6 +150,7 @@ public:
 
     friend class Mode;
     friend class ModeCircle;
+    friend class ModeEight;
     friend class ModeStabilize;
     friend class ModeTraining;
     friend class ModeAcro;
@@ -304,6 +305,7 @@ private:
 #endif
 
     ModeCircle mode_circle;
+    ModeEight mode_eight;
     ModeStabilize mode_stabilize;
     ModeTraining mode_training;
     ModeAcro mode_acro;
