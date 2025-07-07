@@ -204,6 +204,7 @@ bool Plane::gcs_mode_enabled(const Mode::Number mode_num) const
     static const uint8_t mode_list [] {
         (uint8_t)Mode::Number::MANUAL,
         (uint8_t)Mode::Number::CIRCLE,
+        (uint8_t)Mode::Number::EIGHT,
         (uint8_t)Mode::Number::STABILIZE,
         (uint8_t)Mode::Number::TRAINING,
         (uint8_t)Mode::Number::ACRO,
