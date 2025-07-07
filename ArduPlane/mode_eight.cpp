@@ -9,7 +9,10 @@ bool ModeEight::_enter()
 
     radius_m = (fabsf(plane.aparm.loiter_radius) <= 1) ? LOITER_RADIUS_DEFAULT : fabsf(plane.aparm.loiter_radius);
 
+    cross_alt_cm = plane.target_altitude.amsl_cm;
+
     cross_loc = plane.next_WP_loc;
+    cross_loc.set_alt_cm(cross_alt_cm, Location::AltFrame::ABSOLUTE);
 
     const float yaw_rad = radians(ahrs.yaw_sensor * 0.01f);
     Vector2f ofs(radius_m, 0);
@@ -17,9 +20,11 @@ bool ModeEight::_enter()
 
     right_loc = cross_loc;
     right_loc.offset(ofs.x, ofs.y);
+    right_loc.set_alt_cm(cross_alt_cm, Location::AltFrame::ABSOLUTE);
 
     left_loc = cross_loc;
     left_loc.offset(-ofs.x, -ofs.y);
+    left_loc.set_alt_cm(cross_alt_cm, Location::AltFrame::ABSOLUTE);
 
     direction = 1;
     plane.next_WP_loc = right_loc;
@@ -40,15 +45,6 @@ void ModeEight::update()
     if (labs(plane.loiter.sum_cd) >= 18000) {
         direction = -direction;
 
-        cross_loc = plane.current_loc;
-        const float yaw_rad = radians(ahrs.yaw_sensor * 0.01f);
-        Vector2f ofs(radius_m, 0);
-        ofs.rotate(yaw_rad + M_PI_2);
-        right_loc = cross_loc;
-        right_loc.offset(ofs.x, ofs.y);
-        left_loc = cross_loc;
-        left_loc.offset(-ofs.x, -ofs.y);
-
         if (direction > 0) {
             plane.next_WP_loc = right_loc;
             plane.next_WP_loc.loiter_ccw = 0;
@@ -56,6 +52,7 @@ void ModeEight::update()
             plane.next_WP_loc = left_loc;
             plane.next_WP_loc.loiter_ccw = 1;
         }
+        plane.next_WP_loc.set_alt_cm(cross_alt_cm, Location::AltFrame::ABSOLUTE);
         plane.loiter.direction = direction;
         plane.loiter_angle_reset();
     }
