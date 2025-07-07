@@ -2,6 +2,7 @@
 #include <AP_HAL/AP_HAL.h>
 #include <AP_CANManager/AP_CANManager.h>
 #if HAL_ENABLE_DRONECAN_DRIVERS
+#include <canard/interface.h>
 #include <canard/handler_list.h>
 #include <canard/transfer_object.h>
 #include <AP_Math/AP_Math.h>
