@@ -406,27 +406,23 @@ protected:
     bool _enter() override;
 };
 
-class ModeEight : public Mode
+class ModeFigure8 : public Mode
 {
 public:
 
-    Number mode_number() const override { return Number::EIGHT; }
-    const char *name() const override { return "EIGHT"; }
-    const char *name4() const override { return "EIGH"; }
+    Number mode_number() const override { return Number::FIGURE8; }
+    const char *name() const override { return "FIGURE8"; }
+    const char *name4() const override { return "FIG8"; }
 
     void update() override;
 
 protected:
-
     bool _enter() override;
 
 private:
     int8_t direction = 1;
-    float radius_m = 0;
-    float origin_yaw_rad = 0;
-    Location cross_loc{};
-    Location right_loc{};
-    Location left_loc{};
+    uint32_t last_switch_ms = 0;
+    static constexpr uint32_t switch_period_ms = 5000;
 };
 
 class ModeLoiter : public Mode
