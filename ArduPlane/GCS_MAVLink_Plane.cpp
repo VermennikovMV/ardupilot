@@ -58,6 +58,7 @@ uint8_t GCS_MAVLINK_Plane::base_mode() const
     case Mode::Number::AVOID_ADSB:
     case Mode::Number::GUIDED:
     case Mode::Number::CIRCLE:
+    case Mode::Number::FIGURE8:
     case Mode::Number::TAKEOFF:
 #if MODE_AUTOLAND_ENABLED
     case Mode::Number::AUTOLAND:
@@ -1331,6 +1332,7 @@ uint8_t GCS_MAVLINK_Plane::send_available_mode(uint8_t index) const
     const Mode* fw_modes[] {
         &plane.mode_manual,
         &plane.mode_circle,
+        &plane.mode_figure8,
         &plane.mode_stabilize,
         &plane.mode_training,
         &plane.mode_acro,

@@ -176,6 +176,7 @@ public:
 #if MODE_AUTOLAND_ENABLED
     friend class ModeAutoLand;
 #endif
+    friend class ModeFigure8;
 #if AP_EXTERNAL_CONTROL_ENABLED
     friend class AP_ExternalControl_Plane;
 #endif
@@ -303,6 +304,7 @@ private:
 #endif
 
     ModeCircle mode_circle;
+    ModeFigure8 mode_figure8;
     ModeStabilize mode_stabilize;
     ModeTraining mode_training;
     ModeAcro mode_acro;
@@ -1066,6 +1068,8 @@ private:
     bool fence_stickmixing() const;
     bool in_fence_recovery() const;
     uint8_t orig_breaches;
+#else
+    void fence_run_checks();
 #endif
 
     // Plane.cpp

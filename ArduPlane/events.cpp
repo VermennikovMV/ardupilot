@@ -92,6 +92,7 @@ void Plane::failsafe_short_on_event(enum failsafe_state fstype, ModeReason reaso
         }
          break;
     case Mode::Number::CIRCLE:  // these modes never take any short failsafe action and continue
+    case Mode::Number::FIGURE8:
     case Mode::Number::TAKEOFF:
     case Mode::Number::RTL:
 #if HAL_QUADPLANE_ENABLED
@@ -127,6 +128,7 @@ void Plane::failsafe_long_on_event(enum failsafe_state fstype, ModeReason reason
     case Mode::Number::CRUISE:
     case Mode::Number::TRAINING:
     case Mode::Number::CIRCLE:
+    case Mode::Number::FIGURE8:
     case Mode::Number::LOITER:
     case Mode::Number::THERMAL:
     case Mode::Number::TAKEOFF:
