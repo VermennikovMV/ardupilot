@@ -70,6 +70,7 @@ public:
 #if MODE_AUTOLAND_ENABLED
         AUTOLAND      = 26,
 #endif
+        FIGURE_EIGHT  = 27,
 
     // Mode number 30 reserved for "offboard" for external/lua control.
     };
@@ -461,6 +462,31 @@ private:
 
 };
 #endif // HAL_QUADPLANE_ENABLED
+
+class ModeFigureEight : public Mode
+{
+public:
+
+    Number mode_number() const override { return Number::FIGURE_EIGHT; }
+    const char *name() const override { return "FIGURE8"; }
+    const char *name4() const override { return "FG8T"; }
+
+    // methods that affect movement of the vehicle in this mode
+    void update() override;
+
+    bool does_auto_navigation() const override { return true; }
+
+    bool does_auto_throttle() const override { return true; }
+
+protected:
+
+    bool _enter() override;
+
+private:
+    Location center1;
+    Location center2;
+    bool on_second_circle{false};
+};
 
 class ModeManual : public Mode
 {

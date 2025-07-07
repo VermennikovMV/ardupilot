@@ -1304,6 +1304,7 @@ bool Plane::nav_scripting_enable(uint8_t mode)
        case Mode::Number::FLY_BY_WIRE_B:
        case Mode::Number::CRUISE:
        case Mode::Number::LOITER:
+       case Mode::Number::FIGURE_EIGHT:
            nav_scripting.enabled = true;
            nav_scripting.current_ms = AP_HAL::millis();
            break;
