@@ -3,22 +3,50 @@
 
 bool ModeEight::_enter()
 {
-    plane.next_WP_loc = plane.current_loc;
+    plane.do_loiter_at_location();
+    plane.setup_terrain_target_alt(plane.next_WP_loc);
+    plane.loiter_angle_reset();
+
+    radius_m = (fabsf(plane.aparm.loiter_radius) <= 1) ? LOITER_RADIUS_DEFAULT : fabsf(plane.aparm.loiter_radius);
+
+    cross_loc = plane.next_WP_loc;
+
+    const float yaw_rad = radians(ahrs.yaw_sensor * 0.01f);
+    Vector2f ofs(radius_m, 0);
+    ofs.rotate(yaw_rad + M_PI_2);
+
+    right_loc = cross_loc;
+    right_loc.offset(ofs.x, ofs.y);
+
+    left_loc = cross_loc;
+    left_loc.offset(-ofs.x, -ofs.y);
+
     direction = 1;
-    last_heading_cd = ahrs.yaw_sensor;
+    plane.next_WP_loc = right_loc;
+    plane.next_WP_loc.loiter_ccw = 0;
+    plane.loiter.direction = direction;
+
     return true;
 }
 
 void ModeEight::update()
 {
-    plane.nav_roll_cd  = plane.roll_limit_cd / 3 * direction;
-    plane.update_load_factor();
+    plane.calc_nav_roll();
     plane.calc_nav_pitch();
     plane.calc_throttle();
 
-    int32_t heading_diff = wrap_180_cd(ahrs.yaw_sensor - last_heading_cd);
-    if (labs(heading_diff) >= 18000) {
+    plane.update_loiter(0);
+
+    if (labs(plane.loiter.sum_cd) >= 18000) {
         direction = -direction;
-        last_heading_cd = ahrs.yaw_sensor;
+        if (direction > 0) {
+            plane.next_WP_loc = right_loc;
+            plane.next_WP_loc.loiter_ccw = 0;
+        } else {
+            plane.next_WP_loc = left_loc;
+            plane.next_WP_loc.loiter_ccw = 1;
+        }
+        plane.loiter.direction = direction;
+        plane.loiter_angle_reset();
     }
 }

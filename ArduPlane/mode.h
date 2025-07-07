@@ -422,7 +422,10 @@ protected:
 
 private:
     int8_t direction = 1;
-    int32_t last_heading_cd = 0;
+    float radius_m = 0;
+    Location cross_loc{};
+    Location right_loc{};
+    Location left_loc{};
 };
 
 class ModeLoiter : public Mode
