@@ -1,18 +1,25 @@
-class ModeFigure8 : public Mode
+#include "mode.h"
+#include "Plane.h"
+
+bool ModeEight::_enter()
 {
-public:
+    // maintain altitude at entry
+    plane.next_WP_loc.alt = plane.current_loc.alt;
+    direction = 1;
+    last_switch_ms = AP_HAL::millis();
+    return true;
+}
 
-    Number mode_number() const override { return Number::FIGURE8; }
-    const char *name() const override { return "FIGURE8"; }
-    const char *name4() const override { return "FIG8"; }
+void ModeEight::update()
+{
+    const uint32_t now = AP_HAL::millis();
+    if (now - last_switch_ms > switch_period_ms) {
+        direction = -direction;
+        last_switch_ms = now;
+    }
 
-    void update() override;
-
-protected:
-    bool _enter() override;
-
-private:
-    int8_t direction = 1;
-    uint32_t last_switch_ms = 0;
-    static constexpr uint32_t switch_period_ms = 5000;
-};
+    plane.nav_roll_cd = direction * plane.roll_limit_cd / 3;
+    plane.update_load_factor();
+    plane.calc_nav_pitch();
+    plane.calc_throttle();
+}
