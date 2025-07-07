@@ -406,13 +406,13 @@ protected:
     bool _enter() override;
 };
 
-class ModeFigure8 : public Mode
+class ModeEight : public Mode
 {
 public:
 
-    Number mode_number() const override { return Number::FIGURE8; }
-    const char *name() const override { return "FIGURE8"; }
-    const char *name4() const override { return "FIG8"; }
+    Number mode_number() const override { return Number::EIGHT; }
+    const char *name() const override { return "EIGHT"; }
+    const char *name4() const override { return "EIGH"; }
 
     void update() override;
 
