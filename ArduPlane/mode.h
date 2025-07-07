@@ -423,6 +423,7 @@ protected:
 private:
     int8_t direction = 1;
     float radius_m = 0;
+    float origin_yaw_rad = 0;
     Location cross_loc{};
     Location right_loc{};
     Location left_loc{};

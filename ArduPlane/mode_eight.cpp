@@ -5,15 +5,15 @@ bool ModeEight::_enter()
 {
     plane.do_loiter_at_location();
     plane.setup_terrain_target_alt(plane.next_WP_loc);
+    plane.set_target_altitude_current();
     plane.loiter_angle_reset();
 
     radius_m = (fabsf(plane.aparm.loiter_radius) <= 1) ? LOITER_RADIUS_DEFAULT : fabsf(plane.aparm.loiter_radius);
 
     cross_loc = plane.next_WP_loc;
-
-    const float yaw_rad = radians(ahrs.yaw_sensor * 0.01f);
+    origin_yaw_rad = radians(ahrs.yaw_sensor * 0.01f);
     Vector2f ofs(radius_m, 0);
-    ofs.rotate(yaw_rad + M_PI_2);
+    ofs.rotate(origin_yaw_rad + M_PI_2);
 
     right_loc = cross_loc;
     right_loc.offset(ofs.x, ofs.y);
@@ -39,15 +39,6 @@ void ModeEight::update()
 
     if (labs(plane.loiter.sum_cd) >= 18000) {
         direction = -direction;
-
-        cross_loc = plane.current_loc;
-        const float yaw_rad = radians(ahrs.yaw_sensor * 0.01f);
-        Vector2f ofs(radius_m, 0);
-        ofs.rotate(yaw_rad + M_PI_2);
-        right_loc = cross_loc;
-        right_loc.offset(ofs.x, ofs.y);
-        left_loc = cross_loc;
-        left_loc.offset(-ofs.x, -ofs.y);
 
         if (direction > 0) {
             plane.next_WP_loc = right_loc;
