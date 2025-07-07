@@ -836,6 +836,7 @@ const Plane::TerrainLookupTable Plane::Terrain_lookup[] = {
     {Mode::Number::AVOID_ADSB, terrain_bitmask::AVOID_ADSB},
     {Mode::Number::GUIDED, terrain_bitmask::GUIDED},
     {Mode::Number::LOITER, terrain_bitmask::LOITER},
+    {Mode::Number::FIGURE8, terrain_bitmask::LOITER},
     {Mode::Number::CIRCLE, terrain_bitmask::CIRCLE},
 #if HAL_QUADPLANE_ENABLED
     {Mode::Number::QRTL, terrain_bitmask::QRTL},

@@ -213,6 +213,7 @@ bool Plane::gcs_mode_enabled(const Mode::Number mode_num) const
         (uint8_t)Mode::Number::AUTOTUNE,
         (uint8_t)Mode::Number::AUTO,
         (uint8_t)Mode::Number::LOITER,
+        (uint8_t)Mode::Number::FIGURE8,
         (uint8_t)Mode::Number::TAKEOFF,
         (uint8_t)Mode::Number::AVOID_ADSB,
         (uint8_t)Mode::Number::GUIDED,

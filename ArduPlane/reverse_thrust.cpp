@@ -71,6 +71,9 @@ bool Plane::allow_reverse_thrust(void) const
     case Mode::Number::LOITER:
         allow |= (g.use_reverse_thrust & USE_REVERSE_THRUST_LOITER);
         break;
+    case Mode::Number::FIGURE8:
+        allow |= (g.use_reverse_thrust & USE_REVERSE_THRUST_LOITER);
+        break;
     case Mode::Number::RTL:
         allow |= (g.use_reverse_thrust & USE_REVERSE_THRUST_RTL);
         break;
