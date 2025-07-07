@@ -1341,6 +1341,7 @@ uint8_t GCS_MAVLINK_Plane::send_available_mode(uint8_t index) const
         &plane.mode_auto,
         &plane.mode_rtl,
         &plane.mode_loiter,
+        &plane.mode_figure8,
 #if HAL_ADSB_ENABLED
         &plane.mode_avoidADSB,
 #endif
