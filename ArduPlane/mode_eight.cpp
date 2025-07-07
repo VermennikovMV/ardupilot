@@ -37,7 +37,7 @@ void ModeEight::update()
 
     plane.update_loiter(0);
 
-    if (labs(plane.loiter.sum_cd) >= 14000) {
+    if (labs(plane.loiter.sum_cd) >= 18000) {
         direction = -direction;
 
         if (direction > 0) {
