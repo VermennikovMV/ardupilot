@@ -317,6 +317,7 @@ private:
 #if HAL_ADSB_ENABLED
     ModeAvoidADSB mode_avoidADSB;
 #endif
+    ModeFigure8 mode_figure8;
     ModeGuided mode_guided;
     ModeInitializing mode_initializing;
     ModeManual mode_manual;
