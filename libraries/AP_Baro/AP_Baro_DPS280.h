@@ -26,7 +26,9 @@ public:
         return probe(baro, std::move(dev), false);
     }
 
-    static AP_Baro_Backend *probe(AP_Baro &baro, AP_HAL::OwnPtr<AP_HAL::Device> dev, bool _is_dps310=false);
+    static AP_Baro_Backend *probe(AP_Baro &baro, AP_HAL::OwnPtr<AP_HAL::Device> dev,
+                                   bool _is_dps310=false,
+                                   enum DevTypes _devtype=DEVTYPE_BARO_DPS280);
 
 protected:
     bool init(bool _is_dps310);
@@ -50,6 +52,7 @@ protected:
     float last_temperature;
     bool pending_reset;
     bool is_dps310;
+    enum DevTypes devtype;
 
     struct dps280_cal {
         int16_t C0;  // 12bit
@@ -67,6 +70,13 @@ protected:
 
 class AP_Baro_DPS310 : public AP_Baro_DPS280 {
     // like DPS280 but workaround for temperature bug
+public:
+    using AP_Baro_DPS280::AP_Baro_DPS280;
+    static AP_Baro_Backend *probe(AP_Baro &baro, AP_HAL::OwnPtr<AP_HAL::Device> dev);
+};
+
+class AP_Baro_DPS368 : public AP_Baro_DPS280 {
+    // DPS368 is a waterproof variant of DPS310, same register set
 public:
     using AP_Baro_DPS280::AP_Baro_DPS280;
     static AP_Baro_Backend *probe(AP_Baro &baro, AP_HAL::OwnPtr<AP_HAL::Device> dev);
