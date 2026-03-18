@@ -1,0 +1,179 @@
+From 6ea81c11827f152ab5031b977d198425aa012703 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 18 Mar 2026 12:07:55 +0000
+Subject: [PATCH] AP_Baro: add DPS368 barometer support
+
+The DPS368 is Infineon's waterproof replacement for the DPS310, sharing
+the same register set and communication protocol. Newer MatekH743 boards
+ship with DPS368 instead of DPS310, but the driver failed to initialize
+because the WHOAMI check compared the full Product and Revision ID
+register (0x0D) byte against 0x10, which would reject chips with
+different silicon revisions.
+
+Changes:
+- Fix WHOAMI check to only verify Product ID bits (lower nibble),
+  ignoring the Revision ID in bits [7:4] that varies between revisions
+- Add AP_Baro_DPS368 class with proper DEVTYPE_BARO_DPS368 device type
+- Add DPS368 probe entry to MatekH743 hwdef.dat
+- Update build_options.py description to mention DPS368
+
+https://claude.ai/code/session_01HH517C8kSerbV2SW5QKpHW
+---
+ Tools/scripts/build_options.py                |  2 +-
+ libraries/AP_Baro/AP_Baro_Backend.h           |  1 +
+ libraries/AP_Baro/AP_Baro_DPS280.cpp          | 25 ++++++++++++-------
+ libraries/AP_Baro/AP_Baro_DPS280.h            | 12 ++++++++-
+ .../AP_HAL_ChibiOS/hwdef/MatekH743/hwdef.dat  |  3 ++-
+ 5 files changed, 31 insertions(+), 12 deletions(-)
+
+diff --git a/Tools/scripts/build_options.py b/Tools/scripts/build_options.py
+index d68953a..5def4ad 100644
+--- a/Tools/scripts/build_options.py
++++ b/Tools/scripts/build_options.py
+@@ -320,7 +320,7 @@ BUILD_OPTIONS = [
+     Feature('Baro', 'BMP280', 'AP_BARO_BMP280_ENABLED', 'Enable BMP280 Barometric Sensor', 1, None),
+     Feature('Baro', 'BMP388', 'AP_BARO_BMP388_ENABLED', 'Enable BMP388 Barometric Sensor', 1, None),
+     Feature('Baro', 'BMP581', 'AP_BARO_BMP581_ENABLED', 'Enable BMP581 Barometric Sensor', 1, None),
+-    Feature('Baro', 'DPS280', 'AP_BARO_DPS280_ENABLED', 'Enable DPS280/DPS310 Barometric Sensor', 1, None),
++    Feature('Baro', 'DPS280', 'AP_BARO_DPS280_ENABLED', 'Enable DPS280/DPS310/DPS368 Barometric Sensor', 1, None),
+     # Feature('Baro', 'DUMMY', 'AP_BARO_DUMMY_ENABLED', 'Enable DUMMY Barometric Sensor', 0, None),
+     Feature('Baro', 'EXTERNALAHRS_BARO', 'AP_BARO_EXTERNALAHRS_ENABLED', 'Enable EXTERNALAHRS Barometric Sensor', 0, 'AHRS_EXT'),  # NOQA
+     Feature('Baro', 'FBM320', 'AP_BARO_FBM320_ENABLED', 'Enable FBM320 Barometric Sensor', 1, None),
+diff --git a/libraries/AP_Baro/AP_Baro_Backend.h b/libraries/AP_Baro/AP_Baro_Backend.h
+index 04aaf99..f0c8e6f 100644
+--- a/libraries/AP_Baro/AP_Baro_Backend.h
++++ b/libraries/AP_Baro/AP_Baro_Backend.h
+@@ -57,6 +57,7 @@ public:
+         DEVTYPE_BARO_SPA06    = 0x16,
+         DEVTYPE_BARO_AUAV     = 0x17,
+         DEVTYPE_BARO_MS5837_02BA = 0x18,
++        DEVTYPE_BARO_DPS368   = 0x19,
+     };
+ 
+ protected:
+diff --git a/libraries/AP_Baro/AP_Baro_DPS280.cpp b/libraries/AP_Baro/AP_Baro_DPS280.cpp
+index 82cfec5..74beb13 100644
+--- a/libraries/AP_Baro/AP_Baro_DPS280.cpp
++++ b/libraries/AP_Baro/AP_Baro_DPS280.cpp
+@@ -39,7 +39,8 @@ extern const AP_HAL::HAL &hal;
+ #define DPS280_REG_COEF   0x10
+ #define DPS280_REG_CSRC   0x28
+ 
+-#define DPS280_WHOAMI 0x10
++#define DPS280_PROD_ID 0x00
++#define DPS280_PROD_ID_MASK 0x0F
+ 
+ #define TEMPERATURE_LIMIT_C 120
+ 
+@@ -50,7 +51,9 @@ AP_Baro_DPS280::AP_Baro_DPS280(AP_Baro &baro, AP_HAL::OwnPtr<AP_HAL::Device> _de
+ }
+ 
+ AP_Baro_Backend *AP_Baro_DPS280::probe(AP_Baro &baro,
+-                                       AP_HAL::OwnPtr<AP_HAL::Device> _dev, bool _is_dps310)
++                                       AP_HAL::OwnPtr<AP_HAL::Device> _dev,
++                                       bool _is_dps310,
++                                       enum DevTypes _devtype)
+ {
+     if (!_dev) {
+         return nullptr;
+@@ -59,6 +62,7 @@ AP_Baro_Backend *AP_Baro_DPS280::probe(AP_Baro &baro,
+     AP_Baro_DPS280 *sensor = NEW_NOTHROW AP_Baro_DPS280(baro, std::move(_dev));
+     if (sensor) {
+         sensor->is_dps310 = _is_dps310;
++        sensor->devtype = _devtype;
+     }
+     if (!sensor || !sensor->init(_is_dps310)) {
+         delete sensor;
+@@ -71,7 +75,14 @@ AP_Baro_Backend *AP_Baro_DPS310::probe(AP_Baro &baro,
+                                        AP_HAL::OwnPtr<AP_HAL::Device> _dev)
+ {
+     // same as DPS280 but with is_dps310 set for temperature fix
+-    return AP_Baro_DPS280::probe(baro, std::move(_dev), true);
++    return AP_Baro_DPS280::probe(baro, std::move(_dev), true, DEVTYPE_BARO_DPS310);
++}
++
++AP_Baro_Backend *AP_Baro_DPS368::probe(AP_Baro &baro,
++                                       AP_HAL::OwnPtr<AP_HAL::Device> _dev)
++{
++    // DPS368 is a waterproof variant of DPS310, same register set and workarounds
++    return AP_Baro_DPS280::probe(baro, std::move(_dev), true, DEVTYPE_BARO_DPS368);
+ }
+ 
+ /*
+@@ -175,7 +186,7 @@ bool AP_Baro_DPS280::init(bool _is_dps310)
+ 
+     uint8_t whoami=0;
+     if (!dev->read_registers(DPS280_REG_PID, &whoami, 1) ||
+-        whoami != DPS280_WHOAMI) {
++        (whoami & DPS280_PROD_ID_MASK) != DPS280_PROD_ID) {
+         dev->get_semaphore()->give();
+         return false;
+     }
+@@ -190,11 +201,7 @@ bool AP_Baro_DPS280::init(bool _is_dps310)
+     set_config_registers();
+ 
+     instance = _frontend.register_sensor();
+-    if(_is_dps310) {
+-	    dev->set_device_type(DEVTYPE_BARO_DPS310);
+-    } else {
+-	    dev->set_device_type(DEVTYPE_BARO_DPS280);
+-    }
++    dev->set_device_type(devtype);
+     set_bus_id(instance, dev->get_bus_id());
+     
+     dev->get_semaphore()->give();
+diff --git a/libraries/AP_Baro/AP_Baro_DPS280.h b/libraries/AP_Baro/AP_Baro_DPS280.h
+index 7976926..d2c25ae 100644
+--- a/libraries/AP_Baro/AP_Baro_DPS280.h
++++ b/libraries/AP_Baro/AP_Baro_DPS280.h
+@@ -26,7 +26,9 @@ public:
+         return probe(baro, std::move(dev), false);
+     }
+ 
+-    static AP_Baro_Backend *probe(AP_Baro &baro, AP_HAL::OwnPtr<AP_HAL::Device> dev, bool _is_dps310=false);
++    static AP_Baro_Backend *probe(AP_Baro &baro, AP_HAL::OwnPtr<AP_HAL::Device> dev,
++                                   bool _is_dps310=false,
++                                   enum DevTypes _devtype=DEVTYPE_BARO_DPS280);
+ 
+ protected:
+     bool init(bool _is_dps310);
+@@ -50,6 +52,7 @@ protected:
+     float last_temperature;
+     bool pending_reset;
+     bool is_dps310;
++    enum DevTypes devtype;
+ 
+     struct dps280_cal {
+         int16_t C0;  // 12bit
+@@ -72,5 +75,12 @@ public:
+     static AP_Baro_Backend *probe(AP_Baro &baro, AP_HAL::OwnPtr<AP_HAL::Device> dev);
+ };
+ 
++class AP_Baro_DPS368 : public AP_Baro_DPS280 {
++    // DPS368 is a waterproof variant of DPS310, same register set
++public:
++    using AP_Baro_DPS280::AP_Baro_DPS280;
++    static AP_Baro_Backend *probe(AP_Baro &baro, AP_HAL::OwnPtr<AP_HAL::Device> dev);
++};
++
+ 
+ #endif  // AP_BARO_DPS280_ENABLED
+diff --git a/libraries/AP_HAL_ChibiOS/hwdef/MatekH743/hwdef.dat b/libraries/AP_HAL_ChibiOS/hwdef/MatekH743/hwdef.dat
+index 880df1a..1a35c6c 100644
+--- a/libraries/AP_HAL_ChibiOS/hwdef/MatekH743/hwdef.dat
++++ b/libraries/AP_HAL_ChibiOS/hwdef/MatekH743/hwdef.dat
+@@ -209,9 +209,10 @@ IMU Invensense SPI:icm20602 ROTATION_ROLL_180_YAW_270
+ IMU Invensense SPI:mpu6000 ROTATION_ROLL_180_YAW_270
+ define HAL_DEFAULT_INS_FAST_SAMPLE 1
+ 
+-# DPS310 integrated on I2C2 bus, multiple possible choices for external barometer
++# DPS310/DPS368 integrated on I2C2 bus, multiple possible choices for external barometer
+ BARO MS5611 I2C:0:0x77
+ BARO DPS310 I2C:0:0x76
++BARO DPS368 I2C:0:0x76
+ BARO BMP280 I2C:0:0x76
+ 
+ define HAL_OS_FATFS_IO 1
+-- 
+2.43.0
+
