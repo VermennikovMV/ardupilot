@@ -71,7 +71,7 @@
 #define GPS_MAX_RATE_MS 200 // maximum value of rate_ms (i.e. slowest update rate) is 5hz or 200ms
 #endif
 #define GPS_BAUD_TIME_MS 1200
-#define GPS_TIMEOUT_MS 4000u
+#define GPS_TIMEOUT_MS 6000u
 
 extern const AP_HAL::HAL &hal;
 
