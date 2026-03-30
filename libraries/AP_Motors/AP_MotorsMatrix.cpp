@@ -168,19 +168,30 @@ void AP_MotorsMatrix::output_to_motors()
             // set motor output based on thrust requests
             for (i = 0; i < AP_MOTORS_MAX_NUM_MOTORS; i++) {
                 if (motor_enabled[i]) {
-                    float actuator = thr_lin.thrust_to_actuator(_thrust_rpyt_out[i]);
-                    // smoothly scale actuator output to zero as pilot throttle approaches zero.
-                    // this prevents motors from spinning due to stabilization corrections
-                    // when the pilot commands no thrust. uses spin_min as the scaling
-                    // reference (full actuator output at throttle >= spin_min), with a
-                    // minimum reference of 0.1 to handle spin_min=0 and provide a
-                    // generous deadband that covers RC calibration and filter noise.
-                    const float scale_ref = MAX(thr_lin.get_spin_min(), 0.1f);
-                    actuator *= constrain_float(get_throttle() / scale_ref, 0.0f, 1.0f);
-                    set_actuator_with_slew(_actuator[i], actuator);
+                    set_actuator_with_slew(_actuator[i], thr_lin.thrust_to_actuator(_thrust_rpyt_out[i]));
                 }
             }
             break;
+    }
+
+    // Zero-throttle motor stop: smoothly scale all actuator outputs toward zero
+    // as pilot throttle input approaches zero. This prevents stabilization
+    // corrections from spinning motors when the pilot commands no thrust.
+    // Uses get_throttle_in() (raw, unfiltered) to avoid filter transients
+    // that caused brief motor spin at ARM with the filtered get_throttle().
+    // The scale reference is MAX(spin_min, 0.1) to provide a smooth ramp
+    // and generous deadband covering RC calibration tolerances.
+    // Placed after the spool-state switch so it applies to ALL states.
+    if (_spool_state != SpoolState::SHUT_DOWN) {
+        const float scale_ref = MAX(thr_lin.get_spin_min(), 0.1f);
+        const float thr_scale = constrain_float(get_throttle_in() / scale_ref, 0.0f, 1.0f);
+        if (thr_scale < 1.0f) {
+            for (i = 0; i < AP_MOTORS_MAX_NUM_MOTORS; i++) {
+                if (motor_enabled[i]) {
+                    _actuator[i] *= thr_scale;
+                }
+            }
+        }
     }
 
     // convert output to PWM and send to each motor
@@ -401,19 +412,6 @@ void AP_MotorsMatrix::output_armed_stabilizing()
     for (uint8_t i = 0; i < AP_MOTORS_MAX_NUM_MOTORS; i++) {
         if (motor_enabled[i]) {
             _thrust_rpyt_out[i] = (throttle_thrust_best_plus_adj * _throttle_factor[i]) + (rpy_scale * _thrust_rpyt_out[i]);
-        }
-    }
-
-    // smoothly suppress stabilization outputs as pilot throttle approaches zero.
-    // this prevents the mixer's raised throttle floor from spinning motors when
-    // the pilot commands no thrust. uses the same scaling reference as output_to_motors.
-    const float mixer_scale_ref = MAX(thr_lin.get_spin_min(), 0.1f);
-    const float mixer_thr_scale = constrain_float(get_throttle() / mixer_scale_ref, 0.0f, 1.0f);
-    if (mixer_thr_scale < 1.0f) {
-        for (uint8_t i = 0; i < AP_MOTORS_MAX_NUM_MOTORS; i++) {
-            if (motor_enabled[i]) {
-                _thrust_rpyt_out[i] *= mixer_thr_scale;
-            }
         }
     }
 
