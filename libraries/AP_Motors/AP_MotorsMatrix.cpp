@@ -395,6 +395,17 @@ void AP_MotorsMatrix::output_armed_stabilizing()
         }
     }
 
+    // when pilot throttle is zero, do not allow stabilization outputs to spin motors
+    // this prevents the mixer from raising the throttle floor to accommodate roll/pitch/yaw
+    // corrections when the pilot has commanded zero thrust
+    if (is_zero(throttle_thrust)) {
+        for (uint8_t i = 0; i < AP_MOTORS_MAX_NUM_MOTORS; i++) {
+            if (motor_enabled[i]) {
+                _thrust_rpyt_out[i] = 0.0f;
+            }
+        }
+    }
+
     // determine throttle thrust for harmonic notch
     // compensation_gain can never be zero
     _throttle_out = throttle_thrust_best_plus_adj / compensation_gain;
