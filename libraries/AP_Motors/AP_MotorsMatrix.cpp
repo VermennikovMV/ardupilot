@@ -168,7 +168,13 @@ void AP_MotorsMatrix::output_to_motors()
             // set motor output based on thrust requests
             for (i = 0; i < AP_MOTORS_MAX_NUM_MOTORS; i++) {
                 if (motor_enabled[i]) {
-                    set_actuator_with_slew(_actuator[i], thr_lin.thrust_to_actuator(_thrust_rpyt_out[i]));
+                    // when pilot throttle is zero, bypass thrust linearization to avoid
+                    // spin_min offset causing motors to spin from stabilization outputs
+                    if (is_zero(get_throttle())) {
+                        set_actuator_with_slew(_actuator[i], 0.0f);
+                    } else {
+                        set_actuator_with_slew(_actuator[i], thr_lin.thrust_to_actuator(_thrust_rpyt_out[i]));
+                    }
                 }
             }
             break;
@@ -392,17 +398,6 @@ void AP_MotorsMatrix::output_armed_stabilizing()
     for (uint8_t i = 0; i < AP_MOTORS_MAX_NUM_MOTORS; i++) {
         if (motor_enabled[i]) {
             _thrust_rpyt_out[i] = (throttle_thrust_best_plus_adj * _throttle_factor[i]) + (rpy_scale * _thrust_rpyt_out[i]);
-        }
-    }
-
-    // when pilot throttle is zero, do not allow stabilization outputs to spin motors
-    // this prevents the mixer from raising the throttle floor to accommodate roll/pitch/yaw
-    // corrections when the pilot has commanded zero thrust
-    if (is_zero(throttle_thrust)) {
-        for (uint8_t i = 0; i < AP_MOTORS_MAX_NUM_MOTORS; i++) {
-            if (motor_enabled[i]) {
-                _thrust_rpyt_out[i] = 0.0f;
-            }
         }
     }
 
