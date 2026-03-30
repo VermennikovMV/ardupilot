@@ -169,16 +169,14 @@ void AP_MotorsMatrix::output_to_motors()
             for (i = 0; i < AP_MOTORS_MAX_NUM_MOTORS; i++) {
                 if (motor_enabled[i]) {
                     float actuator = thr_lin.thrust_to_actuator(_thrust_rpyt_out[i]);
-                    // when pilot throttle is near zero, scale down actuator output
-                    // to prevent motors from spinning due to stabilization corrections.
-                    // with spin_min > 0: smoothly scale between 0 and spin_min
-                    // with spin_min = 0: force actuator to zero below threshold
-                    const float spin_min = thr_lin.get_spin_min();
-                    if (spin_min > 0.0f) {
-                        actuator *= constrain_float(get_throttle() / spin_min, 0.0f, 1.0f);
-                    } else if (get_throttle() < 0.01f) {
-                        actuator = 0.0f;
-                    }
+                    // smoothly scale actuator output to zero as pilot throttle approaches zero.
+                    // this prevents motors from spinning due to stabilization corrections
+                    // when the pilot commands no thrust. uses spin_min as the scaling
+                    // reference (full actuator output at throttle >= spin_min), with a
+                    // minimum reference of 0.1 to handle spin_min=0 and provide a
+                    // generous deadband that covers RC calibration and filter noise.
+                    const float scale_ref = MAX(thr_lin.get_spin_min(), 0.1f);
+                    actuator *= constrain_float(get_throttle() / scale_ref, 0.0f, 1.0f);
                     set_actuator_with_slew(_actuator[i], actuator);
                 }
             }
@@ -406,14 +404,15 @@ void AP_MotorsMatrix::output_armed_stabilizing()
         }
     }
 
-    // when pilot throttle is near zero, suppress stabilization outputs to prevent
-    // the mixer from spinning motors via the raised throttle floor.
-    // checks get_throttle() directly (before compensation_gain) to avoid
-    // battery/altitude scaling affecting the zero-throttle detection.
-    if (get_throttle() < 0.01f) {
+    // smoothly suppress stabilization outputs as pilot throttle approaches zero.
+    // this prevents the mixer's raised throttle floor from spinning motors when
+    // the pilot commands no thrust. uses the same scaling reference as output_to_motors.
+    const float mixer_scale_ref = MAX(thr_lin.get_spin_min(), 0.1f);
+    const float mixer_thr_scale = constrain_float(get_throttle() / mixer_scale_ref, 0.0f, 1.0f);
+    if (mixer_thr_scale < 1.0f) {
         for (uint8_t i = 0; i < AP_MOTORS_MAX_NUM_MOTORS; i++) {
             if (motor_enabled[i]) {
-                _thrust_rpyt_out[i] = 0.0f;
+                _thrust_rpyt_out[i] *= mixer_thr_scale;
             }
         }
     }
