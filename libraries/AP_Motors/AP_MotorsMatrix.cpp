@@ -174,7 +174,7 @@ void AP_MotorsMatrix::output_to_motors()
                     const float spin_min = thr_lin.get_spin_min();
                     if (spin_min > 0.0f) {
                         actuator *= constrain_float(get_throttle() / spin_min, 0.0f, 1.0f);
-                    } else if (is_zero(get_throttle())) {
+                    } else if (get_throttle() < 0.01f) {
                         actuator = 0.0f;
                     }
                     set_actuator_with_slew(_actuator[i], actuator);
@@ -401,6 +401,17 @@ void AP_MotorsMatrix::output_armed_stabilizing()
     for (uint8_t i = 0; i < AP_MOTORS_MAX_NUM_MOTORS; i++) {
         if (motor_enabled[i]) {
             _thrust_rpyt_out[i] = (throttle_thrust_best_plus_adj * _throttle_factor[i]) + (rpy_scale * _thrust_rpyt_out[i]);
+        }
+    }
+
+    // when pilot throttle is near zero, suppress stabilization outputs to prevent
+    // the mixer from spinning motors via the raised throttle floor.
+    // uses a threshold (1%) instead of exact zero to handle RC stick drift.
+    if (throttle_thrust < 0.01f) {
+        for (uint8_t i = 0; i < AP_MOTORS_MAX_NUM_MOTORS; i++) {
+            if (motor_enabled[i]) {
+                _thrust_rpyt_out[i] = 0.0f;
+            }
         }
     }
 
