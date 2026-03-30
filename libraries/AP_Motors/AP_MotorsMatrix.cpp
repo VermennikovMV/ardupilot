@@ -397,8 +397,9 @@ void AP_MotorsMatrix::output_armed_stabilizing()
 
     // when pilot throttle is near zero, suppress stabilization outputs to prevent
     // the mixer from spinning motors via the raised throttle floor.
-    // uses a threshold (1%) instead of exact zero to handle RC stick drift.
-    if (throttle_thrust < 0.01f) {
+    // checks get_throttle() directly (before compensation_gain) to avoid
+    // battery/altitude scaling affecting the zero-throttle detection.
+    if (get_throttle() < 0.01f) {
         for (uint8_t i = 0; i < AP_MOTORS_MAX_NUM_MOTORS; i++) {
             if (motor_enabled[i]) {
                 _thrust_rpyt_out[i] = 0.0f;
