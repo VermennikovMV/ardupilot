@@ -4201,7 +4201,13 @@ void GCS_MAVLINK::handle_rc_channels_override(const mavlink_message_t &msg)
 
     for (uint8_t i=0; i<8; i++) {
         // Per MAVLink spec a value of UINT16_MAX means to ignore this field.
-        if (override_data[i] != UINT16_MAX) {
+        // A value of 0 is also treated as "ignore" because 0 is not a valid
+        // RC PWM value and GCS implementations use 0 to indicate an unmapped
+        // channel. Without this check, override_value is set to 0, causing
+        // has_override() to return false and falling back to hardware RC input
+        // which may return a non-zero value (e.g. 1500 from a spring-centered
+        // axis), causing unintended motor spin-up on arm.
+        if (override_data[i] != UINT16_MAX && override_data[i] != 0) {
             RC_Channels::set_override(i, override_data[i], tnow);
         }
     }
