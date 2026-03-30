@@ -305,7 +305,17 @@ bool RC_Channel::update(void)
     if (has_override() && !rc().option_is_enabled(RC_Channels::Option::IGNORE_OVERRIDES)) {
         radio_in = override_value;
     } else if (rc().has_had_rc_receiver() && !rc().option_is_enabled(RC_Channels::Option::IGNORE_RECEIVER)) {
-        radio_in = hal.rcin->read(ch_in);
+        // If other channels are being actively controlled via GCS overrides but
+        // this channel has no override, use a safe default instead of reading
+        // from the hardware RC receiver. This prevents spring-centred joystick
+        // axes (e.g. gamepad sticks used for pitch/roll/yaw) from feeding an
+        // unintended ~1500 PWM value into the throttle channel, which would
+        // make throttle_zero false and cause motors to spin up on arm.
+        if (rc().has_active_overrides()) {
+            radio_in = (type_in == ControlType::RANGE) ? radio_min.get() : radio_trim.get();
+        } else {
+            radio_in = hal.rcin->read(ch_in);
+        }
     } else {
         return false;
     }
