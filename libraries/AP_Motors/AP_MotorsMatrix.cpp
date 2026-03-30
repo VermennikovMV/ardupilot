@@ -168,7 +168,18 @@ void AP_MotorsMatrix::output_to_motors()
             // set motor output based on thrust requests
             for (i = 0; i < AP_MOTORS_MAX_NUM_MOTORS; i++) {
                 if (motor_enabled[i]) {
-                    set_actuator_with_slew(_actuator[i], thr_lin.thrust_to_actuator(_thrust_rpyt_out[i]));
+                    float actuator = thr_lin.thrust_to_actuator(_thrust_rpyt_out[i]);
+                    // when pilot throttle is near zero, scale down actuator output
+                    // to prevent motors from spinning due to stabilization corrections.
+                    // with spin_min > 0: smoothly scale between 0 and spin_min
+                    // with spin_min = 0: force actuator to zero below threshold
+                    const float spin_min = thr_lin.get_spin_min();
+                    if (spin_min > 0.0f) {
+                        actuator *= constrain_float(get_throttle() / spin_min, 0.0f, 1.0f);
+                    } else if (get_throttle() < 0.01f) {
+                        actuator = 0.0f;
+                    }
+                    set_actuator_with_slew(_actuator[i], actuator);
                 }
             }
             break;
