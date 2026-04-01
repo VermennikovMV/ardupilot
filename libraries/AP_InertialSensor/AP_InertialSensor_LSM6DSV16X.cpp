@@ -217,7 +217,8 @@ bool AP_InertialSensor_LSM6DSV16X::write_register(uint8_t reg, uint8_t v)
  *  - Pulsed data-ready interrupt
  *
  * The gyro sensitivity at 2000 dps is 70 mdps/LSB (per datasheet section 4.1).
- * ArduPilot converts to rad/s: scale = radians(2000) / 32768.
+ * ArduPilot converts to rad/s: scale = radians(0.070) = 0.070 * DEG_TO_RAD.
+ * Note: unlike Bosch IMUs, ST sensitivity != FS/32768 (70 mdps != 61 mdps).
  */
 void AP_InertialSensor_LSM6DSV16X::configure_gyro()
 {
@@ -284,8 +285,8 @@ void AP_InertialSensor_LSM6DSV16X::configure_accel()
  *
  * Data format: 16-bit signed little-endian per axis (X, Y, Z).
  *
- * Gyro scale: 70 mdps/LSB at 2000 dps FS → rad/s = raw * radians(2000) / 32768
- * Accel scale: 0.488 mg/LSB at 16 G FS → m/s² = raw * (16 * GRAVITY_MSS) / 32768
+ * Gyro scale: 70 mdps/LSB at 2000 dps FS → rad/s = raw * radians(0.070)
+ * Accel scale: 0.488 mg/LSB at 16 G FS → m/s² = raw * 0.000488 * GRAVITY_MSS
  */
 void AP_InertialSensor_LSM6DSV16X::read_sensor()
 {
@@ -298,7 +299,8 @@ void AP_InertialSensor_LSM6DSV16X::read_sensor()
 
     // Parse gyro (first 6 bytes)
     {
-        const float gyro_scale = radians(2000.0f) / 32768.0f;
+        // Datasheet: 70 mdps/LSB at FS=±2000 dps (NOT 2000/32768!)
+        const float gyro_scale = radians(0.070f);
         int16_t raw[3];
         raw[0] = int16_t(uint16_t(data[0] | (data[1] << 8)));
         raw[1] = int16_t(uint16_t(data[2] | (data[3] << 8)));
@@ -313,7 +315,8 @@ void AP_InertialSensor_LSM6DSV16X::read_sensor()
 
     // Parse accel (next 6 bytes)
     {
-        const float accel_scale = (GRAVITY_MSS * 16.0f) / 32768.0f;
+        // Datasheet: 0.488 mg/LSB at FS=±16G
+        const float accel_scale = 0.000488f * GRAVITY_MSS;
         int16_t raw[3];
         raw[0] = int16_t(uint16_t(data[6] | (data[7] << 8)));
         raw[1] = int16_t(uint16_t(data[8] | (data[9] << 8)));
