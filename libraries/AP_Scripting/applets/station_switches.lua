@@ -12,8 +12,10 @@
 --   Rising edge  (LOW→HIGH) → ARM
 --   Falling edge (HIGH→LOW) → DISARM
 --
--- При сходе со станины магнитный контакт размыкается → HIGH →
--- ARM сохраняется, борт продолжает полёт.
+-- При входе в режим GUIDED_NOGPS (mode 20) тумблеры блокируются —
+-- скрипт продолжает обновлять prev-состояния пинов, но не выполняет
+-- ARM/DISARM и не переключает RC. Это предотвращает ложные
+-- срабатывания при сходе со станины.
 --
 -- Тумблер RC — toggle: каждое замыкание (falling edge)
 -- переключает PWM на RC6 между 1100 и 1500.
@@ -37,6 +39,8 @@ local RC_PWM_ON         = 1500     -- PWM при включённом состо
 
 local DEBOUNCE_MS       = 100      -- Антидребезг, мс
 local POLL_INTERVAL_MS  = 50       -- Период опроса, мс
+
+local MODE_GUIDED_NOGPS = 20       -- Copter GUIDED_NOGPS mode number
 
 --------------------------------------------------------------------
 -- СОСТОЯНИЕ
@@ -97,12 +101,22 @@ local function update()
         return update, POLL_INTERVAL_MS
     end
 
-    -- === ТУМБЛЕР ARM / DISARM (по уровню) ===
-    -- Rising edge  (LOW→HIGH, тумблер выкл / сход со станины) → ARM
-    -- Falling edge (HIGH→LOW, тумблер вкл)                    → DISARM
+    -- Edge detection работает ВСЕГДА (чтобы prev не рассинхронизировался)
     local arm_edge
     arm_edge, arm_prev, arm_edge_time = detect_edge(arm_now, arm_prev, arm_edge_time, now)
 
+    local rc_edge
+    rc_edge, rc_prev, rc_edge_time = detect_edge(rc_now, rc_prev, rc_edge_time, now)
+
+    -- Блокировка тумблеров в режиме GUIDED_NOGPS
+    local mode = vehicle:get_mode()
+    if mode == MODE_GUIDED_NOGPS then
+        return update, POLL_INTERVAL_MS
+    end
+
+    -- === ТУМБЛЕР ARM / DISARM (по уровню) ===
+    -- Rising edge  (LOW→HIGH, тумблер выкл) → ARM
+    -- Falling edge (HIGH→LOW, тумблер вкл)  → DISARM
     if arm_edge == "rising" then
         if not arming:is_armed() then
             if arming:arm() then
@@ -122,9 +136,6 @@ local function update()
     end
 
     -- === ТУМБЛЕР RC PWM (toggle по falling edge) ===
-    local rc_edge
-    rc_edge, rc_prev, rc_edge_time = detect_edge(rc_now, rc_prev, rc_edge_time, now)
-
     if rc_edge == "falling" then
         rc_is_on = not rc_is_on
         log(6, string.format("RC%d -> %d", RC_CHANNEL, rc_is_on and RC_PWM_ON or RC_PWM_OFF))
