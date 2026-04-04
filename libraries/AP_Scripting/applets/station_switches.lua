@@ -1,12 +1,22 @@
 -- station_switches.lua
 -- ============================================================
 -- Станина с магнитными контактами, два тумблера:
---   Тумблер 1 (S5 / GPIO 54) — ARM / DISARM (toggle)
+--   Тумблер 1 (S5 / GPIO 54) — ARM / DISARM (по уровню)
 --   Тумблер 2 (S6 / GPIO 55) — PWM на RC6: 1100 ↔ 1500 (toggle)
 --
 -- Pull-up: разомкнуто = HIGH (true), замкнуто на GND = LOW (false).
--- Реагируем ТОЛЬКО на falling edge (HIGH→LOW = замыкание).
--- Rising edge (размыкание при взлёте) — игнорируется.
+--
+-- Тумблер ARM — привязка к уровню:
+--   HIGH (тумблер выкл / контакт разомкнут) → ARM
+--   LOW  (тумблер вкл  / контакт замкнут)   → DISARM
+--   Rising edge  (LOW→HIGH) → ARM
+--   Falling edge (HIGH→LOW) → DISARM
+--
+-- При сходе со станины магнитный контакт размыкается → HIGH →
+-- ARM сохраняется, борт продолжает полёт.
+--
+-- Тумблер RC — toggle: каждое замыкание (falling edge)
+-- переключает PWM на RC6 между 1100 и 1500.
 --
 -- ============================================================
 -- ТРЕБОВАНИЯ (параметры ArduPilot):
@@ -55,22 +65,22 @@ local function read_pin(pin)
     return gpio:read(pin)
 end
 
---- Детектор falling edge (HIGH→LOW = замыкание контакта).
---- Rising edge (LOW→HIGH = размыкание) обновляет prev, но НЕ триггерит.
-local function falling_edge(cur, prev, edge_time, now)
+--- Детектор фронтов с антидребезгом.
+--- Возвращает: edge ("rising"/"falling"/nil), new_prev, new_edge_time
+local function detect_edge(cur, prev, edge_time, now)
     if cur == prev then
-        return false, prev, edge_time
+        return nil, prev, edge_time
     end
-    -- Есть изменение — проверяем антидребезг
     if (now - edge_time) < DEBOUNCE_MS then
-        return false, prev, edge_time
+        return nil, prev, edge_time
     end
-    -- Falling edge: true → false (замыкание)
     if prev == true and cur == false then
-        return true, cur, now
+        return "falling", cur, now
     end
-    -- Rising edge: false → true (размыкание) — обновляем, не триггерим
-    return false, cur, now
+    if prev == false and cur == true then
+        return "rising", cur, now
+    end
+    return nil, cur, now
 end
 
 --------------------------------------------------------------------
@@ -87,31 +97,35 @@ local function update()
         return update, POLL_INTERVAL_MS
     end
 
-    -- === ТУМБЛЕР ARM / DISARM ===
-    local arm_trig
-    arm_trig, arm_prev, arm_edge_time = falling_edge(arm_now, arm_prev, arm_edge_time, now)
+    -- === ТУМБЛЕР ARM / DISARM (по уровню) ===
+    -- Rising edge  (LOW→HIGH, тумблер выкл / сход со станины) → ARM
+    -- Falling edge (HIGH→LOW, тумблер вкл)                    → DISARM
+    local arm_edge
+    arm_edge, arm_prev, arm_edge_time = detect_edge(arm_now, arm_prev, arm_edge_time, now)
 
-    if arm_trig then
+    if arm_edge == "rising" then
         if not arming:is_armed() then
             if arming:arm() then
-                log(6, "ARM (switch)")
+                log(6, "ARM (switch OFF / undocked)")
             else
                 log(4, "ARM FAILED — check pre-arm")
             end
-        else
+        end
+    elseif arm_edge == "falling" then
+        if arming:is_armed() then
             if arming:disarm() then
-                log(6, "DISARM (switch)")
+                log(6, "DISARM (switch ON)")
             else
                 log(4, "DISARM FAILED")
             end
         end
     end
 
-    -- === ТУМБЛЕР RC PWM ===
-    local rc_trig
-    rc_trig, rc_prev, rc_edge_time = falling_edge(rc_now, rc_prev, rc_edge_time, now)
+    -- === ТУМБЛЕР RC PWM (toggle по falling edge) ===
+    local rc_edge
+    rc_edge, rc_prev, rc_edge_time = detect_edge(rc_now, rc_prev, rc_edge_time, now)
 
-    if rc_trig then
+    if rc_edge == "falling" then
         rc_is_on = not rc_is_on
         log(6, string.format("RC%d -> %d", RC_CHANNEL, rc_is_on and RC_PWM_ON or RC_PWM_OFF))
     end
