@@ -925,6 +925,7 @@ bool Plane::get_target_location(Location& target_loc)
     case Mode::Number::GUIDED:
     case Mode::Number::AUTO:
     case Mode::Number::LOITER:
+    case Mode::Number::FIGURE_EIGHT:
     case Mode::Number::TAKEOFF:
 #if HAL_QUADPLANE_ENABLED
     case Mode::Number::QLOITER:

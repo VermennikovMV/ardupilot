@@ -78,6 +78,7 @@ void Plane::rc_failsafe_short_on_event()
     case Mode::Number::AVOID_ADSB:
     case Mode::Number::GUIDED:
     case Mode::Number::LOITER:
+    case Mode::Number::FIGURE_EIGHT:
     case Mode::Number::THERMAL:
         if (g.fs_action_short != FS_ACTION_SHORT_BESTGUESS) { // if acton = 0(BESTGUESS) this group of modes take no action
             failsafe.saved_mode_number = control_mode->mode_number();
@@ -91,6 +92,7 @@ void Plane::rc_failsafe_short_on_event()
         }
          break;
     case Mode::Number::CIRCLE:  // these modes never take any short failsafe action and continue
+    case Mode::Number::FIGURE_EIGHT:
     case Mode::Number::TAKEOFF:
     case Mode::Number::RTL:
 #if HAL_QUADPLANE_ENABLED
@@ -235,6 +237,7 @@ void Plane::failsafe_long_on_event(enum failsafe_state fstype, ModeReason reason
 #if MODE_AUTOLAND_ENABLED
     case Mode::Number::AUTOLAND:
 #endif
+    case Mode::Number::FIGURE_EIGHT:
         break;
     }
     gcs().send_text(MAV_SEVERITY_WARNING, "%s Failsafe On: switched to %s", (reason == ModeReason:: GCS_FAILSAFE) ? "GCS" : "RC Long", control_mode->name());
