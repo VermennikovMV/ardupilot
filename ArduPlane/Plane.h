@@ -160,6 +160,7 @@ public:
     friend class ModeAuto;
     friend class ModeRTL;
     friend class ModeLoiter;
+    friend class ModeFigure8;
     friend class ModeAvoidADSB;
     friend class ModeGuided;
     friend class ModeInitializing;
@@ -306,6 +307,7 @@ private:
     ModeAuto mode_auto;
     ModeRTL mode_rtl;
     ModeLoiter mode_loiter;
+    ModeFigure8 mode_figure8;
 #if HAL_ADSB_ENABLED
     ModeAvoidADSB mode_avoidADSB;
 #endif
