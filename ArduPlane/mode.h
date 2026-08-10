@@ -70,6 +70,7 @@ public:
 #if MODE_AUTOLAND_ENABLED
         AUTOLAND      = 26,
 #endif
+        EIGHT         = 27,
 
     // Mode number 30 reserved for "offboard" for external/lua control.
     };
@@ -424,6 +425,25 @@ public:
 protected:
 
     bool _enter() override;
+};
+
+class ModeEight : public Mode
+{
+public:
+
+    Number mode_number() const override { return Number::EIGHT; }
+    const char *name() const override { return "EIGHT"; }
+    const char *name4() const override { return "EIGH"; }
+
+    void update() override;
+
+protected:
+
+    bool _enter() override;
+
+private:
+    int8_t direction = 1;
+    int32_t last_heading_cd = 0;
 };
 
 class ModeLoiter : public Mode
