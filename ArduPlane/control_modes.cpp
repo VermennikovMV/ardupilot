@@ -88,6 +88,9 @@ Mode *Plane::mode_from_mode_num(const enum Mode::Number num)
         ret = &mode_autoland;
         break;
 #endif //MODE_AUTOLAND_ENABLED
+    case Mode::Number::FIGURE8:
+        ret = &mode_figure8;
+        break;
     case Mode::Number::THERMAL:
 #if HAL_SOARING_ENABLED
         ret = &mode_thermal;
